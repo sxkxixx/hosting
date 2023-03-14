@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "dhtmlx-gantt": "^7.1.13",
+    "react-icons": "^4.8.0"
+  }
+}
