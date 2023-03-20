@@ -1,0 +1,9 @@
+# Project exclude paths
+/venv/
+.idea
+.gitignore
+test.py
+utils.py
+Readme.md
+database.db
+database.py
