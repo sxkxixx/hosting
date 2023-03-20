@@ -1,7 +1,7 @@
 <h1>API</h1>
 <h2>FASTApi</h2>
 
-<h3>User Auth</h3>
+<h3>UserModel Auth</h3>
 <ul>
 
     GET - /api/v1/auth (Авторизация)
