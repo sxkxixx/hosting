@@ -3,11 +3,13 @@ import uvicorn
 from user.models import Role, User
 from database import db
 from user.api import user_route
+from template_route.template_route import template_route
 
 app = FastAPI(
     title='Video Hosting'
 )
 app.include_router(user_route)
+app.include_router(template_route)
 
 
 @app.get('/')
