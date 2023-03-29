@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}
+Загрузка видео
+{% endblock %}
+{% block main %}
+<form class="container" method="post" action="/test_upload_video" enctype="multipart/form-data">
+    <div class="mb-3">
+        <label for="title" class="form-label">Название видео</label>
+        <input type="text" class="form-control" id="title" name="title" placeholder="Введите название видео" required>
+    </div>
+    <div class="mb-3">
+        <label for="description" class="form-label">Описание видео</label>
+        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="video" class="form-label">Прикрепите видео</label>
+        <input class="form-control" type="file" name="file" id="video">
+    </div>
+    <button class="w-100 btn btn-lg btn-primary" type="submit">Загрузить видео</button>
+</form>
+{% endblock %}

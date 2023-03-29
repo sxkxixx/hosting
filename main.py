@@ -4,12 +4,15 @@ from user.models import Role, User
 from database import db
 from user.api import user_route
 from template_route.template_route import template_route
+from video.api import video_router
+from video.models import Video, Like, Comment
 
 app = FastAPI(
     title='Video Hosting'
 )
 app.include_router(user_route)
 app.include_router(template_route)
+app.include_router(video_router)
 
 
 @app.get('/')
@@ -19,5 +22,5 @@ async def render_home_page():
 
 if __name__ == "__main__":
     db.connect()
-    db.create_tables([Role, User])
+    db.create_tables([Role, User, Video, Like, Comment])
     uvicorn.run(app, host="127.0.0.1", port=8000)

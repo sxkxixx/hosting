@@ -23,3 +23,8 @@ async def profile(request: Request, user: User = Depends(get_current_user)):
     if not user:
         raise HTTPException(status_code=401, detail='Пожалуйста, авторизуйтесь или зарегистрируйтесь.')
     return templates.TemplateResponse('profile.html', context={'request': request, 'user': user})
+
+
+@template_route.get('/test_upload_video')
+def upload_video(request: Request):
+    return templates.TemplateResponse('upload_video.html', {'request': request})
