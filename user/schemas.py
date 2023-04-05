@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 
 
 class UserSchema(BaseModel):
@@ -9,3 +9,4 @@ class UserSchema(BaseModel):
 class UserRegister(UserSchema):
     email: EmailStr
     password_repeat: str
+

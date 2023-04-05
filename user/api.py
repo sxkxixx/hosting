@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Response, Request, HTTPException
-from fastapi.responses import HTMLResponse
 from user.hasher import Hasher
 from user.models import User
 from user.auth_data import ALGORITHM, SECRET_KEY, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -25,10 +24,8 @@ async def register(user: UserRegister):
         user_by_data = User.select().where(User.email == email or User.username == username).get()
     except:
         user_by_data = None
-    if user_by_data:
-        return {'status': 200, 'detail': 'Пользователь с таким email уже зарегистрирован'}
-    if password != password_repeat:
-        return {'status': 200, 'detail': 'Пароли не совпадают'}
+    if user_by_data or password != password_repeat:
+        raise HTTPException(status_code=400, detail='Bad Request')
     try:
         user = User.create(
             username=username,
@@ -37,34 +34,32 @@ async def register(user: UserRegister):
             role=1,
         )
         user.save()
-        return {'status': 400, 'detail': 'Пользователь {} успешно создан'.format(user.username)}
+        return {'status': 200, 'detail': 'Пользователь {} успешно создан'.format(user.username)}
     except:
-        return {'status': 200, 'detail': 'Что-то пошло не так'}
+        raise HTTPException(status_code=400, detail='Bad Request')
 
 
 @user_route.post('/login')
 async def login(user: UserSchema, response: Response):
     username, password = user.username, user.password
-    errors = []
     if not (username and password):
-        errors.append('Введите корректные данные.')
-        return {'status': 200, 'detail': 'Невалидные данные'}
+        raise HTTPException(status_code=400, detail='Bad Request')
     try:
         user = User.select().where(username == User.username).get()
         if not user:
-            return {'status': 200, 'detail': 'Нет пользователя с таким именем'}
+            raise HTTPException(status_code=400, detail='Bad Request')
         if Hasher.verify_password(password, user.hashed_password):
-            data = {'sub': username}
+            data = {'sub': username, 'role': user.role.id}
             token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
             response.set_cookie(key='access_token', value=token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-            return {'status': 400, 'detail': 'Пользователь авторизован.'}
+            return Response({'status': 200, 'detail': 'Пользователь авторизован.'})
     except:
-        return {'status': 200, 'detail': 'Что-то пошло не так'}
+        raise HTTPException(status_code=400, detail='Bad Request')
 
 
 @user_route.get('/user/me')
 async def current_user(user: User = Depends(get_current_user)):
     if not user:
-        raise HTTPException(status_code=401, detail='Пожалуйста, авторизуйтесь или зарегистрируйтесь.')
+        raise HTTPException(status_code=401)
 
-    return HTMLResponse(f'user: {user.username}')
+    return Response(f'user: {user.username}')

@@ -26,13 +26,6 @@ app.add_middleware(
     allow_headers=['*']
 )
 
-
-@app.get('/')
-async def render_home_page(request: Request):
-    print(request.body())
-    return {"request": request.body()['username']}
-
-
 if __name__ == "__main__":
     db.connect()
     db.create_tables([Role, User, Video, Like, Comment])
