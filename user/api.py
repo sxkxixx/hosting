@@ -1,24 +1,15 @@
-from fastapi import APIRouter, Depends, Response, Request, HTTPException
-from user.hasher import Hasher
+from typing import Dict, Any
+from fastapi import Depends, Response, HTTPException, Body
+from user.hasher import Hasher, get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
 from user.models import User
-from user.auth_data import ALGORITHM, SECRET_KEY, ACCESS_TOKEN_EXPIRE_MINUTES
-from jose import jwt
 from user.schemas import UserRegister, UserSchema
+import fastapi_jsonrpc as jsonrpc
 
-user_route = APIRouter()
-
-
-async def get_current_user(request: Request):
-    try:
-        username = jwt.decode(request.cookies.get('access_token'), SECRET_KEY, algorithms=[ALGORITHM])['sub']
-        user = User.select().where(User.username == username).get()
-        return user
-    except:
-        return None
+user_route = jsonrpc.Entrypoint(path='/api/v1/user')
 
 
-@user_route.post('/register')
-async def register(user: UserRegister):
+@user_route.method()
+async def register(user: UserRegister) -> dict | Any:
     email, username, password, password_repeat = user.email, user.username, user.password, user.password_repeat
     try:
         user_by_data = User.select().where(User.email == email or User.username == username).get()
@@ -39,8 +30,8 @@ async def register(user: UserRegister):
         raise HTTPException(status_code=400, detail='Bad Request')
 
 
-@user_route.post('/login')
-async def login(user: UserSchema, response: Response):
+@user_route.method()
+async def login(response: Response, user: UserSchema = Body(...)) -> dict | Any:
     username, password = user.username, user.password
     if not (username and password):
         raise HTTPException(status_code=400, detail='Bad Request')
@@ -49,17 +40,16 @@ async def login(user: UserSchema, response: Response):
         if not user:
             raise HTTPException(status_code=400, detail='Bad Request')
         if Hasher.verify_password(password, user.hashed_password):
-            data = {'sub': username, 'role': user.role.id}
-            token = jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+            data = {'sub': username}
+            token = Hasher.get_encode_token(data)
             response.set_cookie(key='access_token', value=token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-            return Response({'status': 200, 'detail': 'Пользователь авторизован.'})
+            return {'detail': 'Authorized'}
     except:
         raise HTTPException(status_code=400, detail='Bad Request')
 
 
-@user_route.get('/user/me')
-async def current_user(user: User = Depends(get_current_user)):
+@user_route.method()
+async def current_user(user: User = Depends(get_current_user)) -> str:
     if not user:
         raise HTTPException(status_code=401)
-
-    return Response(f'user: {user.username}')
+    return f'user: {user.username}'

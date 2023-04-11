@@ -5,12 +5,12 @@ import uuid
 
 
 class Role(BaseModel):
-    id = peewee.UUIDField(primary_key=True, default=uuid.uuid4)
+    id = peewee.AutoField(primary_key=True)
     role_name = peewee.CharField(max_length=30, null=False)
 
 
 class User(BaseModel):
-    id = peewee.UUIDField(primary_key=True, default=uuid.uuid4)
+    id = peewee.AutoField(primary_key=True)
     username = peewee.CharField(unique=True, max_length=25, null=False)
     email = peewee.CharField(unique=True, max_length=100, null=False)
     hashed_password = peewee.CharField(null=False)

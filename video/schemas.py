@@ -5,5 +5,4 @@ from fastapi import File, UploadFile
 class VideoModel(BaseModel):
     title: str
     description: str
-    video_file: UploadFile = File(...)
-
+    video_file: bytes = File(...)

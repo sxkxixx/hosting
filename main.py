@@ -1,4 +1,3 @@
-from fastapi import FastAPI, Request
 import uvicorn
 from user.models import Role, User
 from database import db
@@ -6,16 +5,20 @@ from user.api import user_route
 from video.api import video_router
 from video.models import Video, Like, Comment
 from fastapi.middleware.cors import CORSMiddleware
+import fastapi_jsonrpc as jsonrpc
 
-app = FastAPI(
+
+app = jsonrpc.API(
     title='Video Hosting'
 )
-app.include_router(user_route)
-app.include_router(video_router)
+
+
+app.bind_entrypoint(user_route)
+app.bind_entrypoint(video_router)
 
 origins = [
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:63342",
 ]
 
 app.add_middleware(
