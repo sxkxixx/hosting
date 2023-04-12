@@ -1,4 +1,3 @@
-import uuid
 import peewee
 from database import BaseModel
 from user.models import User
@@ -17,15 +16,22 @@ class Video(BaseModel):
     def url(self):
         return get_url(self.cloud_name)
 
+    @property
+    def video_likes_count(self):
+        try:
+            return Like.select().where(Like.video_id == self.id).count()
+        except:
+            return 0
+
 
 class Like(BaseModel):
     id = peewee.AutoField(primary_key=True)
     user_id = peewee.ForeignKeyField(User, to_field='id')
-    video_id = peewee.ForeignKeyField(Video, to_field='id')
+    video_id = peewee.ForeignKeyField(Video, to_field='id', backref='video_likes')
 
 
 class Comment(BaseModel):
-    id = peewee.AutoField(primary_key=True, default=uuid.uuid4)
+    id = peewee.AutoField(primary_key=True)
     comment_text = peewee.CharField(max_length=500, null=False)
     owner_id = peewee.ForeignKeyField(User, to_field='id', backref='user_comments')
     video_id = peewee.ForeignKeyField(Video, to_field='id', backref='video_comments')
