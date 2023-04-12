@@ -16,10 +16,7 @@ app = jsonrpc.API(
 app.bind_entrypoint(user_route)
 app.bind_entrypoint(video_router)
 
-origins = [
-    "http://localhost",
-    "http://localhost:63342",
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
