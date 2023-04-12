@@ -1,9 +1,7 @@
-# Project exclude paths
 /venv/
 .idea
 .gitignore
 Readme.md
 database.db
 database.py
-data
-video/s3_client.py
+.env

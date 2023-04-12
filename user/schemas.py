@@ -2,11 +2,11 @@ from pydantic import BaseModel, EmailStr, validator
 
 
 class UserSchema(BaseModel):
-    username: str
+    email: EmailStr
     password: str
 
 
 class UserRegister(UserSchema):
-    email: EmailStr
+    username: str
     password_repeat: str
 

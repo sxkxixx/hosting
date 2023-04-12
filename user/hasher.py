@@ -2,11 +2,9 @@ from passlib.context import CryptContext
 from fastapi import Request
 from jose import jwt
 from user.models import User
+from config import SECRET_KEY, ALGORITHM
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-SECRET_KEY = '6a4d3ef4988a34a29b1bbcbbc895fa6cbbd4df36cf545ee3b6119b8c172946da'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 60
 
 
 class Hasher:
@@ -24,10 +22,10 @@ class Hasher:
         return token
 
 
-async def get_current_user(request: Request):
+def get_current_user(request: Request):
     try:
-        username = jwt.decode(request.cookies.get('access_token'), SECRET_KEY, algorithms=[ALGORITHM])['sub']
-        user = User.select().where(User.username == username).get()
+        user_email = jwt.decode(request.cookies.get('access_token'), SECRET_KEY, algorithms=[ALGORITHM])['sub']
+        user = User.select().where(User.email == user_email).get()
         return user
     except:
         return None
