@@ -1,10 +1,9 @@
 import fastapi_jsonrpc as jsonrpc
 from fastapi import File, HTTPException, Request, Response, Depends
-from app.user.hasher import get_current_user
-from app.user.models import User
-from app.video.models import Video, Comment, Like
-from app.video.s3_client import upload_file
-from app.video.schemas import VideoUploadSchema, CommentUploadSchema
+from app.utils.hasher import get_current_user
+from app.core.models.models import User, Video, Comment, Like
+from app.utils.s3_client import upload_file
+from app.core.schemas.schemas import VideoUploadSchema, CommentUploadSchema
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
 
@@ -92,6 +91,3 @@ def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
             'description': video.description,
             'likes': video.video_likes_count,
             'is_liked': is_liked}
-
-
-

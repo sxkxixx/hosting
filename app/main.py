@@ -1,9 +1,7 @@
 import uvicorn
-from app.db import db
-from app.user.api import user_route
-from app.video.api import video_router
-from app.video.models import Video, Like, Comment
-from app.user.models import Role, User
+from app.core.models.models import db, Role, User, Video, Like, Comment
+from app.endpoints.user import user_route
+from app.endpoints.video import video_router
 from fastapi.middleware.cors import CORSMiddleware
 import fastapi_jsonrpc as jsonrpc
 

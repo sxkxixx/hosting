@@ -1,17 +1,16 @@
-from typing import Any
 from fastapi import Depends, Response, HTTPException
-from app.user.hasher import Hasher, get_current_user
-from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
-from app.user.models import User
-from app.user.schemas import UserRegister, UserSchema
+from app.utils.hasher import Hasher, get_current_user
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.core.models.models import User
+from app.core.schemas.schemas import UserRegister, UserSchema
 import fastapi_jsonrpc as jsonrpc
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
 
 
 @user_route.method(tags=['user'])
-async def register(user: UserRegister) -> dict | Any:
-    email, username, password, password_repeat = user.email, user.username, user.password, user.password_repeat
+async def register(user: UserRegister) -> dict:
+    email, username, password, password_repeat = user.email.lower(), user.username.lower(), user.password, user.password_repeat
     try:
         user_by_data = User.select().where(User.email == email or User.username == username).get()
     except:
@@ -32,8 +31,8 @@ async def register(user: UserRegister) -> dict | Any:
 
 
 @user_route.method(tags=['user'])
-async def login(response: Response, user: UserSchema) -> dict | Any:
-    email, password = user.email, user.password
+async def login(response: Response, user: UserSchema) -> dict:
+    email, password = user.email.lower(), user.password
     if not (email and password):
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
@@ -61,4 +60,3 @@ def get_current_user(user: User = Depends(get_current_user)) -> dict:
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     return {'username': user.username}
-
