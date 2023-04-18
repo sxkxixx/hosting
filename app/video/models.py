@@ -1,8 +1,8 @@
 import peewee
-from database import BaseModel
-from user.models import User
+from app.db import BaseModel
+from app.user.models import User
 from datetime import datetime
-from video.s3_client import get_url
+from app.video.s3_client import get_url
 
 
 class Video(BaseModel):

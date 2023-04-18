@@ -1,9 +1,9 @@
 from typing import Any
 from fastapi import Depends, Response, HTTPException
-from user.hasher import Hasher, get_current_user
-from config import ACCESS_TOKEN_EXPIRE_MINUTES
-from user.models import User
-from user.schemas import UserRegister, UserSchema
+from app.user.hasher import Hasher, get_current_user
+from app.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.user.models import User
+from app.user.schemas import UserRegister, UserSchema
 import fastapi_jsonrpc as jsonrpc
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')

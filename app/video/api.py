@@ -1,10 +1,10 @@
 import fastapi_jsonrpc as jsonrpc
 from fastapi import File, HTTPException, Request, Response, Depends
-from user.hasher import get_current_user
-from user.models import User
-from video.models import Video, Comment, Like
-from video.s3_client import upload_file
-from video.schemas import VideoUploadSchema, CommentUploadSchema
+from app.user.hasher import get_current_user
+from app.user.models import User
+from app.video.models import Video, Comment, Like
+from app.video.s3_client import upload_file
+from app.video.schemas import VideoUploadSchema, CommentUploadSchema
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
 
@@ -74,7 +74,7 @@ def change_like_status(video_id: int, user: User = Depends(get_current_user)) ->
 @video_router.method(tags=['video'])
 def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
     try:
-        video = Video.get_by_id(id)
+        video = Video.select().where(id == Video.id).get()
     except:
         raise HTTPException(status_code=400, detail='Bad Request')
     is_liked = False

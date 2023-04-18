@@ -1,7 +1,6 @@
 from datetime import datetime
-from database import BaseModel
+from app.db import BaseModel
 import peewee
-import uuid
 
 
 class Role(BaseModel):
