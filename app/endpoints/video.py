@@ -1,16 +1,15 @@
 import fastapi_jsonrpc as jsonrpc
 from fastapi import File, HTTPException, Request, Response, Depends
-from user.hasher import get_current_user
-from user.models import User
-from video.models import Video, Comment, Like
-from video.s3_client import upload_file
-from video.schemas import VideoUploadSchema, CommentUploadSchema
+from app.utils.hasher import get_current_user
+from app.core.models.models import User, Video, Comment, Like
+from app.utils.s3_client import upload_file
+from app.core.schemas.schemas import VideoUploadSchema, CommentUploadSchema
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
 
 
 @video_router.post('/upload_video', tags=['video'])
-async def upload_video_test(request: Request):
+async def upload_video(request: Request):
     user = get_current_user(request)
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
@@ -64,8 +63,31 @@ def change_like_status(video_id: int, user: User = Depends(get_current_user)) ->
     try:
         like_record = Like.get(video_id == Like.video_id and user.id == Like.user_id)
         like_record.delete_instance()
-        return {'status': 'like is deleted'}
+        return {'status': 'like is removed'}
     except:
         like_record = Like(user_id=user.id, video_id=video_id)
         like_record.save()
         return {'status': 'like is added'}
+
+
+@video_router.method(tags=['video'])
+def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
+    try:
+        video = Video.select().where(id == Video.id).get()
+    except:
+        raise HTTPException(status_code=400, detail='Bad Request')
+    is_liked = False
+    if user:
+        try:
+            Like.select().where(Like.video_id == video.id and Like.user_id == user.id).get()
+            is_liked = True
+        except:
+            is_liked = False
+    return {'url': video.url,
+            'comments': [{'user': User.get_by_id(comment.owner_id).username,
+                          'comment_text': comment.comment_text,
+                          'created_at': comment.created_at} for comment in video.video_comments],
+            'title': video.title,
+            'description': video.description,
+            'likes': video.video_likes_count,
+            'is_liked': is_liked}

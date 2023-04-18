@@ -1,8 +1,8 @@
 from passlib.context import CryptContext
 from fastapi import Request
 from jose import jwt
-from user.models import User
-from config import SECRET_KEY, ALGORITHM
+from app.core.models.models import User
+from app.core.config import SECRET_KEY, ALGORITHM
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

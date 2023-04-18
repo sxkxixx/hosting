@@ -3,5 +3,8 @@
 .gitignore
 Readme.md
 database.db
-database.py
+app/db.py
 .env
+test-front
+Dockerfile
+.dockerignore
