@@ -25,6 +25,6 @@ app.add_middleware(
 
 
 if __name__ == "__main__":
-    db.connect()
+    print(db.connect())
     db.create_tables([Role, User, Video, Like, Comment])
     uvicorn.run(app, host='127.0.0.1', port=8000)

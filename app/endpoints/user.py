@@ -1,7 +1,7 @@
 from fastapi import Depends, Response, HTTPException
 from app.utils.hasher import Hasher, get_current_user
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
-from app.core.models.models import User
+from app.core.models.models import User, Video
 from app.core.schemas.schemas import UserRegister, UserSchema
 import fastapi_jsonrpc as jsonrpc
 
@@ -53,6 +53,25 @@ async def login(response: Response, user: UserSchema) -> dict:
 def logout(response: Response, user: User = Depends(get_current_user)) -> dict:
     response.delete_cookie('access_token')
     return {'user': user.username if user else 'No user', 'status': 'Logout'}
+
+
+@user_route.method(tags=['user'])
+def profile(user: User = Depends(get_current_user)) -> dict:
+    if not user:
+        raise HTTPException(status_code=400, detail='Bad Request')
+    try:
+        videos = Video.select('id', 'title').where(Video.owner_id == user.id)
+    except:
+        videos = []
+        print(f'no videos')
+    context = {
+        'username': user.username,
+        'email': user.email,
+        'videos': [
+            {'id': video.id, 'title': video.title} for video in videos
+        ]
+    }
+    return context
 
 
 @user_route.method(tags=['user'])

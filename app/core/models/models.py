@@ -1,7 +1,10 @@
 from datetime import datetime
 import peewee
+from app.utils.s3_client import get_url
+from app.core.config import POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_HOST
 
-db = peewee.SqliteDatabase('database.db')
+
+db = peewee.PostgresqlDatabase(POSTGRES_DB, user=POSTGRES_USER, password=POSTGRES_PASSWORD, host=POSTGRES_HOST)
 
 
 class BaseModel(peewee.Model):
