@@ -1,5 +1,5 @@
 import uvicorn
-from app.core.models.models import db, Role, User, Video, Like, Comment
+from app.core.models.models import db, Role, User, Video, Like, Comment, Watch
 from app.endpoints.user import user_route
 from app.endpoints.video import video_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -26,5 +26,5 @@ app.add_middleware(
 
 if __name__ == "__main__":
     print(db.connect())
-    db.create_tables([Role, User, Video, Like, Comment])
+    db.create_tables([Role, User, Video, Like, Comment, Watch])
     uvicorn.run(app, host='127.0.0.1', port=8000)

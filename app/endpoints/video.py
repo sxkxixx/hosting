@@ -1,7 +1,7 @@
 import fastapi_jsonrpc as jsonrpc
 from fastapi import File, HTTPException, Request, Response, Depends
 from app.utils.hasher import get_current_user
-from app.core.models.models import User, Video, Comment, Like
+from app.core.models.models import User, Video, Comment, Like, Watch
 from app.utils.s3_client import upload_file
 from app.core.schemas.schemas import VideoUploadSchema, CommentUploadSchema
 
@@ -36,7 +36,7 @@ async def upload_video(request: Request):
 
 
 @video_router.method(tags=['video'])
-def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> str:
+def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> bool:
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     try:
@@ -49,7 +49,7 @@ def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_c
         video_id=comment_data.video_id
     )
     comment.save()
-    return 'Comment successfully uploaded'
+    return True
 
 
 @video_router.method(tags=['video'])
@@ -78,6 +78,7 @@ def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         raise HTTPException(status_code=400, detail='Bad Request')
     is_liked = False
     if user:
+        Watch(video_id=id, user_id=user.id).save()
         try:
             Like.select().where(Like.video_id == video.id and Like.user_id == user.id).get()
             is_liked = True

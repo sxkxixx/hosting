@@ -59,3 +59,9 @@ class Comment(BaseModel):
     owner_id = peewee.ForeignKeyField(User, to_field='id', backref='user_comments')
     video_id = peewee.ForeignKeyField(Video, to_field='id', backref='video_comments')
     created_at = peewee.DateTimeField(default=datetime.utcnow)
+
+
+class Watch(BaseModel):
+    id = peewee.AutoField(primary_key=True)
+    user_id = peewee.ForeignKeyField(User, to_field='id', backref='viewed_videos')
+    video_id = peewee.ForeignKeyField(Video, to_field='id', backref='users_watched')
