@@ -34,7 +34,7 @@ def update_token(response: Response, data: dict, token_type: str,
     response.set_cookie(key=token_type, value=token, httponly=True, expires=expire)
 
 
-def get_current_user(request: Request, response: Response):
+async def get_current_user(request: Request, response: Response):
     token = request.cookies.get('access_token')
     if not token:
         token = request.cookies.get('refresh_token')
@@ -47,6 +47,6 @@ def get_current_user(request: Request, response: Response):
     except:
         email = None
     if email:
-        user = User.select().where(User.email == email).get()
+        user = await User.objects.get(User.email == email)
         return user
     return None

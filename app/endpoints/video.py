@@ -1,7 +1,7 @@
 import fastapi_jsonrpc as jsonrpc
 from fastapi import File, HTTPException, Request, Response, Depends
+from app.core.models.models import User, Video, Comment, Like, View
 from app.utils.hasher import get_current_user
-from app.core.models.models import User, Video, Comment, Like, Watch
 from app.utils.s3_client import upload_file
 from app.core.schemas.schemas import VideoUploadSchema, CommentUploadSchema
 
@@ -22,7 +22,7 @@ async def upload_video(request: Request):
     title, description = form.get('title'), form.get('description')
     file: File(...) = form.get('file')
     try:
-        user = User.select().where(User.id == 1).get()
+        user = await User.objects.get(User.id == 1)
         upload_file(file)
         video = Video(
             title=title, description=description,
@@ -36,11 +36,11 @@ async def upload_video(request: Request):
 
 
 @video_router.method(tags=['video'])
-def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> bool:
+async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> bool:
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     try:
-        video = Video.select().where(comment_data.video_id == Video.id).get()
+        video = await Video.objects.get(comment_data.video_id == Video.id)
     except:
         raise HTTPException(status_code=400, detail='Bad Request')
     comment = Comment(
@@ -48,39 +48,38 @@ def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_c
         owner_id=user.id,
         video_id=comment_data.video_id
     )
-    comment.save()
+    await comment.save()
     return True
 
 
 @video_router.method(tags=['video'])
-def change_like_status(video_id: int, user: User = Depends(get_current_user)) -> dict:
+async def change_like_status(video_id: int, user: User = Depends(get_current_user)) -> dict:
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     try:
-        video = Video.get_by_id(video_id)
+        video = await Video.objects.get(Video.id == video_id)
     except:
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
-        like_record = Like.get(video_id == Like.video_id and user.id == Like.user_id)
-        like_record.delete_instance()
+        like_record = await Like.objects.get(video_id == Like.video_id and user.id == Like.user_id)
+        await like_record.delete()
         return {'status': 'like is removed'}
     except:
-        like_record = Like(user_id=user.id, video_id=video_id)
-        like_record.save()
+        await Like.objects.create(user_id=user.id, video_id=video_id)
         return {'status': 'like is added'}
 
 
 @video_router.method(tags=['video'])
-def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
+async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
     try:
-        video = Video.select().where(id == Video.id).get()
+        video = await Video.objects.get(id == Video.id)
     except:
         raise HTTPException(status_code=400, detail='Bad Request')
     is_liked = False
     if user:
-        Watch(video_id=id, user_id=user.id).save()
+        await View.objects.create(video_id=id, user_id=user.id)
         try:
-            Like.select().where(Like.video_id == video.id and Like.user_id == user.id).get()
+            await Like.objects.get(Like.video_id == video.id and Like.user_id == user.id)
             is_liked = True
         except:
             is_liked = False
