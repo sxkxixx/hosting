@@ -2,14 +2,14 @@ import datetime
 from fastapi import Depends, Response, HTTPException, Body
 from app.utils.hasher import Hasher, get_current_user
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
-from app.core.models.models import User, Video
+from app.core.models.models import User, Video, Role
 from app.core.schemas.schemas import UserRegister, UserSchema
 import fastapi_jsonrpc as jsonrpc
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
 
-logging.basicConfig(filename='logs.log', level=logging.INFO)
+logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'])
@@ -24,14 +24,16 @@ async def register(user: UserRegister) -> dict:
         logging.warning(f'Register: Bad try to register a user')
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
-        user = await User.objects.create(
+        user_role = await Role.objects.get(Role.role_name == 'User')
+        user = User(
             username=username,
             email=email,
             hashed_password=Hasher.get_hash_password(password),
-            role=1,
+            role=user_role.id,
         )
+        await user.save()
         logging.info(f'User {user.email} created')
-        return {'status': 200, 'detail': 'Пользователь {} успешно создан'.format(user.username)}
+        return {'detail': 'Пользователь {} успешно создан'.format(user.email)}
     except:
         logging.error('Register: Something went wrong')
         raise HTTPException(status_code=400, detail='Bad Request')
@@ -64,9 +66,10 @@ async def login(response: Response, user: UserSchema) -> dict:
 
 @user_route.method(tags=['user'])
 def logout(response: Response, user: User = Depends(get_current_user)) -> dict:
-    response.delete_cookie('access_token')
-    response.delete_cookie('refresh_token')
-    logging.info(f'Logout: {user.email} logout')
+    if user:
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        logging.info(f'Logout: {user.email} logout')
     return {'user': user.username if user else 'No user', 'status': 'Logout'}
 
 

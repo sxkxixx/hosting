@@ -8,7 +8,7 @@ import logging
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
 
-logging.basicConfig(filename='logs.log', level=logging.INFO)
+logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.post('/upload_video', tags=['video'])
@@ -73,7 +73,7 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
         logging.warning(f'Change Like Status: No Video')
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
-        like_record = await Like.objects.get(video_id == Like.video_id and user.id == Like.user_id)
+        like_record = await Like.objects.get(video.id == Like.video_id and user.id == Like.user_id)
         logging.info(f'Change Like Status: {like_record.id} deleted')
         await like_record.delete()
         return {'status': 'Removed'}
