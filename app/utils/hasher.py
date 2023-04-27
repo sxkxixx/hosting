@@ -23,25 +23,25 @@ class Hasher:
         if not expires_in:
             expires_in = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         to_encode_data.update({'expire': str(datetime.datetime.utcnow() + expires_in)})
-        token = jwt.encode(to_encode_data, SECRET_KEY, algorithm=ALGORITHM)
+        token = jwt.encode(to_encode_data, key=SECRET_KEY, algorithm=ALGORITHM)
         return token
 
 
 def update_token(response: Response, data: dict, token_type: str,
-                 expire: datetime.timedelta | None = ACCESS_TOKEN_EXPIRE_MINUTES):
+                 expire: int):
     response.delete_cookie(token_type)
     token = Hasher.get_encode_token(data)
     response.set_cookie(key=token_type, value=token, httponly=True, expires=expire)
 
 
-async def get_current_user(request: Request, response: Response):
+async def get_current_user(request: Request, response: Response) -> User | None:
     token = request.cookies.get('access_token')
     if not token:
         token = request.cookies.get('refresh_token')
         if not token:
             return None
         email = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])['sub']
-        update_token(response, {'sub': email}, 'access_token')
+        update_token(response, {'sub': email}, 'access_token', ACCESS_TOKEN_EXPIRE_MINUTES)
     try:
         email = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])['sub']
     except:

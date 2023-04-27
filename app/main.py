@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import fastapi_jsonrpc as jsonrpc
 from app.core.models.models import metadata
 
+
 app = jsonrpc.API(
     title='Video Hosting'
 )

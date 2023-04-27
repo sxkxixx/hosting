@@ -3,6 +3,7 @@ import ormar
 import sqlalchemy
 from datetime import datetime
 from app.core.config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB
+from app.utils.s3_client import get_url
 
 DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/{POSTGRES_DB}'
 database = databases.Database(DATABASE_URL)
@@ -43,6 +44,17 @@ class Video(ormar.Model):
     description: str = ormar.String(nullable=True, max_length=300)
     owner_id: User = ormar.ForeignKey(User, related_name='videos')
     cloud_name: str = ormar.String(max_length=100, nullable=False, unique=True)
+
+    @property
+    def url(self):
+        return get_url(self.cloud_name)
+
+    @property
+    async def likes_amount(self):
+        try:
+            return await Like.objects.filter(Like.video_id == self.id).count()
+        except:
+            return 0
 
 
 class Like(ormar.Model):

@@ -7,3 +7,4 @@ database.db
 Dockerfile
 docker-compose.yml
 **/__pycache__
+logs.log
