@@ -56,7 +56,7 @@ async def login(response: Response, user: UserSchema) -> dict:
             response.set_cookie(key='access_token', value=token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
             response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, expires=60 * 60 * 24)
             logging.info(f'Login: Successfully login {user.email}')
-            return {'user': user.username, 'status': 'Authorized'}
+            return {'user': user.email, 'status': 'Authorized'}
         logging.warning(f'Login: Incorrect password for {user.email}')
         raise HTTPException(status_code=400, detail='Bad Request')
     except:
@@ -77,7 +77,7 @@ def logout(response: Response, user: User = Depends(get_current_user)) -> dict:
 async def profile(user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Profile: No user')
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise HTTPException(status_code=401, detail='Unauthorized')
     try:
         videos = await Video.objects.filter(User.id == Video.owner_id).fields(['id', 'title']).all()
     except:
