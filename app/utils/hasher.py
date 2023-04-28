@@ -35,7 +35,10 @@ def update_token(response: Response, data: dict, token_type: str,
 
 
 async def get_current_user(request: Request, response: Response) -> User | None:
-    token = request.cookies.get('access_token')
+    token = request.cookies.get('access_token', None)
+    refresh_token = request.cookies.get('refresh_token', None)
+    if not refresh_token:
+        return None
     if not token:
         token = request.cookies.get('refresh_token')
         if not token:

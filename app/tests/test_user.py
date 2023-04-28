@@ -1,7 +1,9 @@
+import datetime
 from app.main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
+from app.utils.hasher import Hasher
 
 url = 'http://127.0.0.1:8000/api/v1/user'
 
@@ -116,10 +118,49 @@ async def test_login_method_no_user():
 @pytest.mark.asyncio
 async def test_register_method_sql_injection():
     query_params_register = get_query_params(method='register', body={'user': {
-        'username': 'SELECT * FROM users WHERE id=1', 'email': 'secret@mail.com', 'password': 'SELECT * FROM users WHERE id=1',
+        'username': 'SELECT * FROM users WHERE id=1', 'email': 'secret@mail.com',
+        'password': 'SELECT * FROM users WHERE id=1',
         'password_repeat': 'SELECT * FROM users WHERE id=1'}})
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(url, json=query_params_register)
+
     assert response.status_code == 200
     assert response.json()['error']['message'] == 'Invalid params'
+
+
+@pytest.mark.asyncio
+async def test_profile_method_no_refresh_token():
+    email = 'sasha.kornilov.1212@gmail.com'
+    data = {'sub': email}
+    token = Hasher.get_encode_token(data)
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response = await async_client.post(
+                url,
+                json=get_query_params(method='profile', body={}),
+                cookies={'access_token': token}
+            )
+
+    assert response.status_code == 401
+    assert response.json()['detail'] == 'Unauthorized'
+
+
+@pytest.mark.asyncio
+async def test_profile_method_no_refresh_token():
+    email = 'sasha.kornilov.1212@gmail.com'
+    data = {'sub': email}
+    access_token = Hasher.get_encode_token(data)
+    refresh_token = Hasher.get_encode_token(data, datetime.timedelta(hours=2))
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response = await async_client.post(
+                url,
+                json=get_query_params(method='profile', body={}),
+                cookies={'access_token': access_token, 'refresh_token': refresh_token}
+            )
+
+    assert response.status_code == 200
+    assert response.json()['result']['email'] == email

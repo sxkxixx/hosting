@@ -1,7 +1,7 @@
 import datetime
 from fastapi import Depends, Response, HTTPException, Body
 from app.utils.hasher import Hasher, get_current_user
-from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
 from app.core.models.models import User, Video, Role
 from app.core.schemas.schemas import UserRegister, UserSchema
 import fastapi_jsonrpc as jsonrpc
@@ -52,9 +52,9 @@ async def login(response: Response, user: UserSchema) -> dict:
         if Hasher.verify_password(password, user.hashed_password):
             data = {'sub': email}
             token = Hasher.get_encode_token(data)
-            refresh_token = Hasher.get_encode_token(data, datetime.timedelta(hours=2))
+            refresh_token = Hasher.get_encode_token(data, datetime.timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES))
             response.set_cookie(key='access_token', value=token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, expires=60 * 60 * 24)
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, expires=REFRESH_TOKEN_EXPIRE_MINUTES)
             logging.info(f'Login: Successfully login {user.email}')
             return {'user': user.email, 'status': 'Authorized'}
         logging.warning(f'Login: Incorrect password for {user.email}')
