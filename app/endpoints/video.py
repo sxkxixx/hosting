@@ -1,5 +1,5 @@
 import fastapi_jsonrpc as jsonrpc
-from fastapi import File, HTTPException, Request, Response, Depends
+from fastapi import File, HTTPException, Request, Response, Depends, Body
 from app.core.models.models import User, Video, Comment, Like, View
 from app.utils.hasher import get_current_user
 from app.utils.s3_client import upload_file
@@ -63,6 +63,25 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
 
 
 @video_router.method(tags=['video'])
+async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_current_user)) -> dict:
+    if not user:
+        logging.warning(f'Delete Comment: No User')
+        raise HTTPException(status_code=401, detail='Unauthorized')
+    try:
+        comment = await Comment.objects.get(Comment.id == comment_id)
+    except:
+        logging.warning(f'Delete Comment: No comment {comment_id}')
+        raise HTTPException(status_code=400, detail='Bad Request')
+    if comment.owner_id == user.id:
+        context = {'comment': comment.id, 'status': 'deleted'}
+        await comment.delete()
+        logging.info(f'Delete Comment: Comment Deleted {comment_id}')
+        return context
+    logging.error(f'Delete Comment: User-{user.id} can\'t delete Comment-{comment.id}')
+    raise HTTPException(status_code=400, detail='Bad Request')
+
+
+@video_router.method(tags=['video'])
 async def change_like_status(video_id: int, user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Change Like Status: No User')
@@ -108,3 +127,21 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
             'description': video.description,
             'likes': await video.likes_amount,
             'is_liked': is_liked}
+
+
+@video_router.method(tags=['video'])
+async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user)):
+    if not user:
+        logging.warning(f'Delete Video: No User')
+        raise HTTPException(status_code=401, detail='Bad Request')
+    try:
+        video = await Video.objects.get(Video.id == video_id)
+    except:
+        logging.warning(f'Delete Video: User {user.id}, No Video {video_id}')
+        raise HTTPException(status_code=400, detail='Bad Request')
+    if user.id == video.owner_id:
+        context = {'video': video.id, 'status': 'deleted'}
+        await video.delete()
+        return context
+    logging.error(f'Delete Video: User-{user.id} can\'t delete video-{video.id}')
+    raise HTTPException(status_code=400, detail='Bad Request')
