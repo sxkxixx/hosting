@@ -50,6 +50,9 @@ async def get_current_user(request: Request, response: Response) -> User | None:
     except:
         email = None
     if email:
-        user = await User.objects.get(User.email == email)
-        return user
+        try:
+            user = await User.objects.get(User.email == email)
+            return user
+        except:
+            return None
     return None

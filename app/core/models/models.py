@@ -3,7 +3,7 @@ import ormar
 import sqlalchemy
 from datetime import datetime
 from app.core.config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB
-from app.utils.s3_client import get_url
+from app.utils.s3_client import get_url, delete_object
 
 DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/{POSTGRES_DB}'
 database = databases.Database(DATABASE_URL)
@@ -56,6 +56,9 @@ class Video(ormar.Model):
         except:
             return 0
 
+    def delete_from_s3(self):
+        delete_object(self.cloud_name)
+
 
 class Like(ormar.Model):
     class Meta(BaseMeta):
@@ -74,7 +77,7 @@ class Comment(ormar.Model):
     comment_text: str = ormar.String(max_length=200, nullable=False)
     owner_id: User = ormar.ForeignKey(User, related_name='user_comments')
     video_id: Video = ormar.ForeignKey(Video, relates_name='video_comments')
-    created_at: datetime = ormar.DateTime()
+    created_at: datetime = ormar.DateTime(default=datetime.utcnow)
 
 
 class View(ormar.Model):

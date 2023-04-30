@@ -43,7 +43,7 @@ async def upload_video(request: Request, response: Response):
 
 
 @video_router.method(tags=['video'])
-async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> bool:
+async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Upload Comment: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
@@ -55,11 +55,11 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
     comment = Comment(
         comment_text=comment_data.comment_text,
         owner_id=user.id,
-        video_id=video.video_id
+        video_id=video.id
     )
     await comment.save()
     logging.info(f'Upload Comment: Comment {comment.id} uploaded')
-    return True
+    return {'comment': comment.id, 'status': 'uploaded'}
 
 
 @video_router.method(tags=['video'])
@@ -72,7 +72,7 @@ async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_c
     except:
         logging.warning(f'Delete Comment: No comment {comment_id}')
         raise HTTPException(status_code=400, detail='Bad Request')
-    if comment.owner_id == user.id:
+    if comment.owner_id == user:
         context = {'comment': comment.id, 'status': 'deleted'}
         await comment.delete()
         logging.info(f'Delete Comment: Comment Deleted {comment_id}')
@@ -92,7 +92,7 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
         logging.warning(f'Change Like Status: No Video')
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
-        like_record = await Like.objects.get(video.id == Like.video_id and user.id == Like.user_id)
+        like_record = await Like.objects.get(video.id == Like.video_id.id and user.id == Like.user_id.id)
         logging.info(f'Change Like Status: {like_record.id} deleted')
         await like_record.delete()
         return {'status': 'Removed'}
@@ -133,15 +133,23 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
 async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user)):
     if not user:
         logging.warning(f'Delete Video: No User')
-        raise HTTPException(status_code=401, detail='Bad Request')
+        raise HTTPException(status_code=401, detail='Unauthorized')
     try:
         video = await Video.objects.get(Video.id == video_id)
     except:
         logging.warning(f'Delete Video: User {user.id}, No Video {video_id}')
         raise HTTPException(status_code=400, detail='Bad Request')
-    if user.id == video.owner_id:
+    if user == video.owner_id:
         context = {'video': video.id, 'status': 'deleted'}
+        video.delete_from_s3()
         await video.delete()
         return context
     logging.error(f'Delete Video: User-{user.id} can\'t delete video-{video.id}')
     raise HTTPException(status_code=400, detail='Bad Request')
+
+
+@video_router.method(tags=['video'])
+async def delete_like_record(like_id: int = Body(...)) -> str:
+    like = await Like.objects.get(Like.id == like_id)
+    await like.delete()
+    return 'deleted'
