@@ -2,8 +2,8 @@ import datetime
 from fastapi import Depends, Response, HTTPException, Body
 from app.utils.hasher import Hasher, get_current_user
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
-from app.core.models.models import User, Video, Role
-from app.core.schemas.schemas import UserRegister, UserSchema
+from app.core.models.models import User, Video, Role, Claim
+from app.core.schemas.schemas import UserRegister, UserSchema, ClaimSchema
 import fastapi_jsonrpc as jsonrpc
 import logging
 
@@ -46,15 +46,14 @@ async def login(response: Response, user: UserSchema) -> dict:
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
         user = await User.objects.get(User.email == email)
-        if not user:
-            logging.warning(f'Login: No such User')
-            raise HTTPException(status_code=400, detail='Bad Request')
         if Hasher.verify_password(password, user.hashed_password):
             data = {'sub': email}
-            token = Hasher.get_encode_token(data)
+            access_token = Hasher.get_encode_token(data)
             refresh_token = Hasher.get_encode_token(data, datetime.timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES))
-            response.set_cookie(key='access_token', value=token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, expires=REFRESH_TOKEN_EXPIRE_MINUTES)
+            response.set_cookie(key='access_token', value=access_token, httponly=True,
+                                expires=ACCESS_TOKEN_EXPIRE_MINUTES)
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
+                                expires=REFRESH_TOKEN_EXPIRE_MINUTES)
             logging.info(f'Login: Successfully login {user.email}')
             return {'user': user.email, 'status': 'Authorized'}
         logging.warning(f'Login: Incorrect password for {user.email}')
@@ -89,6 +88,21 @@ async def profile(user: User = Depends(get_current_user)) -> dict:
         'videos': [{'id': video.id, 'title': video.title} for video in videos]
     }
     return context
+
+
+@user_route.method(tags=['user'])
+async def create_claim(claim: ClaimSchema, user: User = Depends(get_current_user)) -> dict:
+    if not user:
+        logging.warning('Send Claim: No User')
+        raise HTTPException(status_code=401, detail='Unauthorized')
+    claim_ = Claim(
+        description=claim.description,
+        claim_type=claim.claim_type,
+        owner=user,
+        claim_object_id=claim.claim_object_id
+    )
+    await claim_.save()
+    return {'claim': claim_.description, 'status': 'created'}
 
 
 @user_route.method(tags=['user'])

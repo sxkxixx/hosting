@@ -85,5 +85,20 @@ class View(ormar.Model):
         tablename = 'views'
 
     id: int = ormar.Integer(primary_key=True)
-    user_id: User = ormar.ForeignKey(User, relates_name='viewed_videos')
-    video_id: Video = ormar.ForeignKey(Video, relates_name='user_views')
+    user_id: User = ormar.ForeignKey(User, related_name='viewed_videos')
+    video_id: Video = ormar.ForeignKey(Video, related_name='user_views')
+
+
+class Claim(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'claims'
+
+    CLAIMS_OBJECTS = ['comment', 'video', 'user']
+    CLAIM_STATUSES = ['sent', 'approved', 'denied']
+
+    id: int = ormar.Integer(primary_key=True)
+    description: str = ormar.String(max_length=200, nullable=False)
+    claim_type: str = ormar.String(max_length=15, choices=CLAIMS_OBJECTS)
+    owner: User = ormar.ForeignKey(User, related_name='user_claims')
+    claim_object_id: int = ormar.Integer()
+    status: str = ormar.String(max_length=15, choices=CLAIM_STATUSES, default='sent')

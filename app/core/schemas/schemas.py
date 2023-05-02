@@ -11,7 +11,7 @@ class UserRegister(UserSchema):
     username: str
     password_repeat: str
 
-    @validator('username', 'password_repeat', 'email')
+    @validator('username', 'password_repeat', 'email', 'password')
     def no_space_validator(cls, v, values, **kwargs):
         if ' ' in v:
             raise ValueError(f'No space in "{kwargs["field"].name.capitalize()}"')
@@ -37,3 +37,9 @@ class VideoUploadSchema(BaseModel):
 class CommentUploadSchema(BaseModel):
     video_id: int
     comment_text: str
+
+
+class ClaimSchema(BaseModel):
+    description: str
+    claim_type: str
+    claim_object_id: int

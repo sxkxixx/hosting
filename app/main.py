@@ -2,6 +2,7 @@ import sqlalchemy
 from app.core.models.models import database, DATABASE_URL
 from app.endpoints.user import user_route
 from app.endpoints.video import video_router
+from app.endpoints.admin import admin_route
 from fastapi.middleware.cors import CORSMiddleware
 import fastapi_jsonrpc as jsonrpc
 from app.core.models.models import metadata
@@ -15,6 +16,7 @@ app.state.database = database
 
 app.bind_entrypoint(user_route)
 app.bind_entrypoint(video_router)
+app.bind_entrypoint(admin_route)
 
 app.add_middleware(
     CORSMiddleware,

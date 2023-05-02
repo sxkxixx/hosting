@@ -148,7 +148,7 @@ async def test_profile_method_no_refresh_token():
 
 
 @pytest.mark.asyncio
-async def test_profile_method_no_refresh_token():
+async def test_profile_method_correct_data():
     email = 'sasha.kornilov.1212@gmail.com'
     data = {'sub': email}
     access_token = Hasher.get_encode_token(data)
