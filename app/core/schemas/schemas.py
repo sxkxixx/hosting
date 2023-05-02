@@ -1,6 +1,5 @@
 from fastapi import File
 from pydantic import BaseModel, EmailStr, validator
-import string
 
 
 class UserSchema(BaseModel):
@@ -20,7 +19,7 @@ class UserRegister(UserSchema):
 
     @validator('password', 'password_repeat')
     def password_len_validator(cls, v, values, **kwargs):
-        if len(v) < 12:
+        if len(v) < 6:
             raise ValueError(f'{kwargs["field"].name.capitalize()} must be longer then 12 symbols')
         return v
 

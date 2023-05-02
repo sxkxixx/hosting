@@ -14,9 +14,13 @@ def upload_file(file):
     s3.upload_fileobj(file.file, BUCKET_NAME, file.filename)
 
 
-def get_url(file_name):
+def get_url(cloud_name):
     url = s3.generate_presigned_url(
         'get_object',
-        Params={"Bucket": BUCKET_NAME, "Key": file_name}, ExpiresIn=300
+        Params={"Bucket": BUCKET_NAME, "Key": cloud_name}, ExpiresIn=300
     )
     return url
+
+
+def delete_object(cloud_name):
+    s3.delete_object(Bucket=BUCKET_NAME, Key=cloud_name)

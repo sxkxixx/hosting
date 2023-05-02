@@ -3,8 +3,8 @@
 .gitignore
 Readme.md
 database.db
-app/db.py
 .env
-test-front
 Dockerfile
-.dockerignore
+docker-compose.yml
+**/__pycache__
+app/logs.log
