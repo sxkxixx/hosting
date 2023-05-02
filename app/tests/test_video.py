@@ -3,7 +3,6 @@ from app.main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
-from app.utils.hasher import Hasher
 
 TEST_USER_EMAIL = 'test@mail.com'
 TEST_USER_PASSWORD = 'secret'
