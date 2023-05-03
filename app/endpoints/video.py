@@ -2,7 +2,7 @@ import fastapi_jsonrpc as jsonrpc
 from fastapi import File, HTTPException, Request, Response, Depends, Body
 from app.core.models.models import User, Video, Comment, Like, View
 from app.utils.hasher import get_current_user
-from app.utils.s3_client import upload_file
+from app.utils.s3_client import upload_video
 from app.core.schemas.schemas import VideoUploadSchema, CommentUploadSchema
 import logging
 
@@ -28,13 +28,15 @@ async def upload_video(request: Request, response: Response):
     file: File(...) = form.get('file')
     try:
         user = await User.objects.get(User.id == user.id)
-        upload_file(file)
+        result = await upload_video(file)
+        if not result:
+            raise HTTPException(status_code=400, detail='Bad Request')
         video = Video(
             title=title, description=description,
             owner_id=user.id, cloud_name=f'{user.id}{file.filename}'
         )
         await video.save()
-        url = video.url
+        url = await video.url()
         logging.info(f'Upload Video: Video {video.id} successfully uploaded')
         return Response({'status': 200, 'url': f'{url}'})
     except:

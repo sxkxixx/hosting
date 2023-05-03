@@ -45,9 +45,8 @@ class Video(ormar.Model):
     owner_id: User = ormar.ForeignKey(User, related_name='videos')
     cloud_name: str = ormar.String(max_length=100, nullable=False, unique=True)
 
-    @property
-    def url(self):
-        return get_url(self.cloud_name)
+    async def url(self):
+        return await get_url(self.cloud_name)
 
     @property
     async def likes_amount(self):
@@ -56,8 +55,8 @@ class Video(ormar.Model):
         except:
             return 0
 
-    def delete_from_s3(self):
-        delete_object(self.cloud_name)
+    async def delete_from_s3(self):
+        await delete_object(self.cloud_name)
 
 
 class Like(ormar.Model):
