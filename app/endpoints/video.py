@@ -116,6 +116,7 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         try:
             await Like.objects.get(Like.video_id == video.id and Like.user_id == user.id)
             is_liked = True
+            await View.objects.create(user_id=user, video_id=video)
         except:
             is_liked = False
     logging.info(f'Get Video: Video({id}) data returned')

@@ -1,14 +1,13 @@
 import logging
 import datetime
-from typing import List
 import fastapi_jsonrpc as jsonrpc
 from fastapi import Depends, HTTPException, Response, Body
 from app.core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.core.schemas.schemas import UserSchema
 from app.utils.hasher import get_current_user, Hasher, get_object_by_id
-from app.core.models.models import User, Claim
+from app.core.models.models import User, Claim, Role
 
-admin_route = jsonrpc.Entrypoint(path='/api/v1/admin_route')
+admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
@@ -16,7 +15,7 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
     try:
         admin: User = await User.objects.get(User.email == admin_schema.email)
-        logging.info(f'Admin Login: Admin({admin_schema.id}) log in')
+        logging.info(f'Admin Login: Admin({admin_schema.email}) loging in')
     except:
         raise HTTPException(status_code=400, detail='Bad Request')
     if not admin.is_superuser:
@@ -36,7 +35,7 @@ async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
 
 
 @admin_route.method(tags=['admin'])
-async def admin_claims(admin: User = Depends(get_current_user)) -> List[dict]:
+async def admin_claims(admin: User = Depends(get_current_user)) -> list[dict]:
     if not admin.is_superuser:
         raise HTTPException(status_code=400, detail='Bad Request')
     claims = await Claim.objects.filter(status='sent').to_dict
@@ -47,7 +46,8 @@ async def admin_claims(admin: User = Depends(get_current_user)) -> List[dict]:
 
 
 @admin_route.method(tags=['admin'])
-async def change_claim_status(claim_id: int = Body(...), status: str = Body(...), admin: User = Depends(get_current_user)) -> dict:
+async def change_claim_status(claim_id: int = Body(...), status: str = Body(...),
+                              admin: User = Depends(get_current_user)) -> dict:
     if not admin.is_superuser:
         raise HTTPException(status_code=400, detail='Bad Request')
     try:

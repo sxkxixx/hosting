@@ -4,15 +4,7 @@ import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
 from app.utils.hasher import Hasher
-
-url = 'http://127.0.0.1:8000/api/v1/user'
-
-
-# -p no:cacheprovider
-
-def get_query_params(method: str, body):
-    return {"jsonrpc": "2.0", "id": 0, "method": method, "params": body}
-
+from app.tests.utils import get_query_params, url
 
 @pytest.mark.asyncio
 async def test_register_method():
@@ -22,7 +14,7 @@ async def test_register_method():
     query_params_delete = get_query_params(method='delete_user', body={"email": email})
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response = await async_client.post(url, json=query_params_register)
+            response = await async_client.post(url('user'), json=query_params_register)
             response_delete = await async_client.post(url, json=query_params_delete)
     assert response.status_code == 200
     assert response.json()['result'] == {'detail': f'Пользователь {email} успешно создан'}
@@ -40,7 +32,7 @@ async def test_register_method_wrong_data():
 
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response = await async_client.post(url, json=query_params_register)
+            response = await async_client.post(url('user'), json=query_params_register)
 
     assert response.status_code == 200
     assert response.json()['error']['message'] == 'Invalid params'
@@ -53,7 +45,7 @@ async def test_register_method_user_exists():
     }})
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response = await async_client.post(url, json=query)
+            response = await async_client.post(url('user'), json=query)
 
     assert response.status_code == 400
     assert response.json()['detail'] == 'Bad Request'
@@ -66,7 +58,7 @@ async def test_register_method_wrong_passwords():
     }})
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response = await async_client.post(url, json=query)
+            response = await async_client.post(url('user'), json=query)
 
     assert response.status_code == 400
     assert response.json()['detail'] == 'Bad Request'
@@ -85,9 +77,9 @@ async def test_register_login_method():
 
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response_register = await async_client.post(url, json=query_params_register)
-            response_login = await async_client.post(url, json=query_params_login)
-            response_delete = await async_client.post(url, json=query_params_delete)
+            response_register = await async_client.post(url('user'), json=query_params_register)
+            response_login = await async_client.post(url('user'), json=query_params_login)
+            response_delete = await async_client.post(url('user'), json=query_params_delete)
 
     assert response_register.status_code == 200
     assert response_register.json()['result'] == {'detail': f'Пользователь {email} успешно создан'}
@@ -109,7 +101,7 @@ async def test_login_method_no_user():
 
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response = await async_client.post(url, json=query)
+            response = await async_client.post(url('user'), json=query)
 
     assert response.status_code == 400
     assert response.json()['detail'] == 'Bad Request'
@@ -123,7 +115,7 @@ async def test_register_method_sql_injection():
         'password_repeat': 'SELECT * FROM users WHERE id=1'}})
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
-            response = await async_client.post(url, json=query_params_register)
+            response = await async_client.post(url('user'), json=query_params_register)
 
     assert response.status_code == 200
     assert response.json()['error']['message'] == 'Invalid params'
@@ -138,7 +130,7 @@ async def test_profile_method_no_refresh_token():
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(
-                url,
+                url('user'),
                 json=get_query_params(method='profile', body={}),
                 cookies={'access_token': token}
             )
@@ -157,7 +149,7 @@ async def test_profile_method_correct_data():
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(
-                url,
+                url('user'),
                 json=get_query_params(method='profile', body={}),
                 cookies={'access_token': access_token, 'refresh_token': refresh_token}
             )
