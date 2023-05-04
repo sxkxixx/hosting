@@ -93,3 +93,52 @@ async def test_like_method_no_user():
 #
 #     assert response.status_code == 422
 #     assert response.json() == 'er'
+
+
+@pytest.mark.asyncio
+async def test_get_video_data(auth_tokens):
+    query = get_query_params(method='get_video', body={'id': 1})
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response = await async_client.post(url('video'), json=query, cookies=auth_tokens)
+
+    assert response.status_code == 200
+    data = response.json()['result']
+    assert data['title'] == 'test'
+    assert data['description'] == 'description'
+
+
+@pytest.mark.asyncio
+async def test_get_video_no_video(auth_tokens):
+    query = get_query_params(method='get_video', body={'id': -1})
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response = await async_client.post(url('video'), json=query, cookies=auth_tokens)
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == 'Bad Request'
+
+
+@pytest.mark.asyncio
+async def test_get_video_comments(auth_tokens):
+    query_comments = get_query_params(method='upload_comment',
+                                      body={'comment_data': {'video_id': 1, 'comment_text': 'Комментарий для тестов'}})
+    query = get_query_params(method='get_video', body={'id': 1})
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response_comment = await async_client.post(url('video'), json=query_comments, cookies=auth_tokens)
+            response_video = await async_client.post(url('video'), json=query, cookies=auth_tokens)
+            comment_id = response_comment.json()['result']['comment']
+            query_delete_comment = get_query_params(method='delete_comment', body={'comment_id': comment_id})
+            response = await async_client.post(url('video'), json=query_delete_comment, cookies=auth_tokens)
+
+    assert response_comment.status_code == 200
+    assert response_video.status_code == 200
+    comment = response_video.json()['result']['comments']
+    print(comment)
+    assert comment['id'] == comment_id
+
+    assert response.status_code == 200

@@ -44,7 +44,7 @@ class Video(ormar.Model):
     id: int = ormar.Integer(primary_key=True)
     title: str = ormar.String(nullable=False, max_length=150)
     description: str = ormar.String(nullable=True, max_length=300)
-    owner_id: User = ormar.ForeignKey(User, related_name='videos')
+    owner: User = ormar.ForeignKey(User, related_name='videos')
     video_cloud_name: str = ormar.String(max_length=100, nullable=False, unique=True)
     preview_cloud_name: str = ormar.String(max_length=100, nullable=True, unique=True)
 
@@ -76,8 +76,8 @@ class Like(ormar.Model):
         tablename = 'likes'
 
     id: int = ormar.Integer(primary_key=True)
-    user_id: User = ormar.ForeignKey(User)
-    video_id: Video = ormar.ForeignKey(Video, related_name='video_likes')
+    user: User = ormar.ForeignKey(User)
+    video: Video = ormar.ForeignKey(Video, related_name='video_likes')
 
 
 class Comment(ormar.Model):
@@ -86,8 +86,8 @@ class Comment(ormar.Model):
 
     id: int = ormar.Integer(primary_key=True)
     comment_text: str = ormar.String(max_length=200, nullable=False)
-    owner_id: User = ormar.ForeignKey(User, related_name='user_comments')
-    video_id: Video = ormar.ForeignKey(Video, relates_name='video_comments')
+    owner: User = ormar.ForeignKey(User, related_name='user_comments')
+    video: Video = ormar.ForeignKey(Video, related_name='video_comments')
     created_at: datetime = ormar.DateTime(default=datetime.utcnow)
 
 
@@ -96,8 +96,8 @@ class View(ormar.Model):
         tablename = 'views'
 
     id: int = ormar.Integer(primary_key=True)
-    user_id: User = ormar.ForeignKey(User, related_name='viewed_videos')
-    video_id: Video = ormar.ForeignKey(Video, related_name='user_views')
+    user: User = ormar.ForeignKey(User, related_name='viewed_videos')
+    video: Video = ormar.ForeignKey(Video, related_name='user_views')
 
 
 class Claim(ormar.Model):

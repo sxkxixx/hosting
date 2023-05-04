@@ -15,7 +15,7 @@ async def test_register_method():
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(url('user'), json=query_params_register)
-            response_delete = await async_client.post(url, json=query_params_delete)
+            response_delete = await async_client.post(url('user'), json=query_params_delete)
     assert response.status_code == 200
     assert response.json()['result'] == {'detail': f'Пользователь {email} успешно создан'}
 
@@ -41,7 +41,7 @@ async def test_register_method_wrong_data():
 @pytest.mark.asyncio
 async def test_register_method_user_exists():
     query = get_query_params(method='register', body={'user': {
-        'username': 'sxkxixx', 'email': 'any_mail@gmail.com', 'password': 'secret', 'password_repeat': 'secret'
+        'username': 'sxkxixx', 'email': 'sasha.kornilov.1212@gmail.com', 'password': 'secret', 'password_repeat': 'secret'
     }})
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:

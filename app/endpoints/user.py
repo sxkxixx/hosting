@@ -29,7 +29,7 @@ async def register(user: UserRegister) -> dict:
             username=username,
             email=email,
             hashed_password=Hasher.get_hash_password(password),
-            role=user_role.id,
+            role=user_role,
         )
         await user.save()
         logging.info(f'User {user.email} created')

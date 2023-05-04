@@ -123,10 +123,10 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         except:
             is_liked = False
     logging.info(f'Get Video: Video({id}) data returned')
-    return {'url': video.video_url,
-            'comments': [{'user': await User.objects.get(User.id == comment.owner_id).username,
-                          'comment_text': comment.comment_text,
-                          'created_at': comment.created_at} for comment in video.video_comments],
+    comments = video.video_comments
+    return {'url': await video.video_url(),
+            'preview': await video.preview_url(),
+            'comments': comments,
             'title': video.title,
             'description': video.description,
             'likes': await video.likes_amount,
