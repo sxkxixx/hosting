@@ -2,6 +2,7 @@ from fastapi import File, UploadFile, Form
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
 
+
 class UserSchema(BaseModel):
     email: EmailStr
     password: str

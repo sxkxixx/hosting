@@ -7,7 +7,7 @@ def get_query_params(method: str, body):
 
 
 # -p no:cacheprovider
-ADMIN_EMAIL = 'admin_test@gmail.com'
+ADMIN_EMAIL = 'admin@gmail.com'
 ADMIN_PASSWORD = 'ADMINSECRET'
 TEST_USER_EMAIL = 'test@mail.com'
 TEST_USER_PASSWORD = 'secret'

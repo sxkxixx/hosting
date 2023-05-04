@@ -102,7 +102,7 @@ async def create_claim(claim: ClaimSchema, user: User = Depends(get_current_user
         claim_object_id=claim.claim_object_id
     )
     await claim_.save()
-    return {'claim': claim_.description, 'status': 'created'}
+    return {'claim': {'id': claim_.id, 'description': claim_.description}, 'status': 'created'}
 
 
 @user_route.method(tags=['user'])

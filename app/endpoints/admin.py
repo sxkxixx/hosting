@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, Response, Body
 from app.core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.core.schemas.schemas import UserSchema
 from app.utils.hasher import get_current_user, Hasher, get_object_by_id
-from app.core.models.models import User, Claim, Role
+from app.core.models.models import User, Claim
 
 admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
@@ -38,10 +38,13 @@ async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
 async def admin_claims(admin: User = Depends(get_current_user)) -> list[dict]:
     if not admin.is_superuser:
         raise HTTPException(status_code=400, detail='Bad Request')
-    claims = await Claim.objects.filter(status='sent')
-    return [{'claim_id': claim.id, 'description': claim.description,
-             'claim_type': claim.claim_type, 'owner': claim.owner.id,
-             'claim_object_id': claim.claim_object_id, 'status': claim.status} for claim in claims]
+    try:
+        claims = await Claim.objects.filter(status='sent').all()
+        return [{'claim_id': claim.id, 'description': claim.description,
+                 'claim_type': claim.claim_type, 'owner': claim.owner.id,
+                 'claim_object_id': claim.claim_object_id, 'status': claim.status} for claim in claims]
+    except Exception as e:
+        print(e)
     # return claims
 
 
