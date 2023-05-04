@@ -62,7 +62,7 @@ class Video(ormar.Model):
     @property
     async def likes_amount(self):
         try:
-            return await Like.objects.filter(Like.video_id == self.id).count()
+            return await Like.objects.filter(Like.video.id == self.id).count()
         except:
             return 0
 

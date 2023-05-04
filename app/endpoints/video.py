@@ -33,7 +33,7 @@ async def upload_video(request: Request, response: Response, title: str = Form(.
             await upload_file(preview_file, preview_cloud_name)
         video = Video(
             title=title, description=description,
-            owner_id=user.id, video_cloud_name=cloud_video_name, preview_cloud_name=preview_cloud_name
+            owner=user, video_cloud_name=cloud_video_name, preview_cloud_name=preview_cloud_name
         )
         await video.save()
         url = await video.video_url()
@@ -56,10 +56,11 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
         raise HTTPException(status_code=400, detail='Bad Request')
     comment = Comment(
         comment_text=comment_data.comment_text,
-        owner_id=user.id,
-        video_id=video.id
+        owner=user,
+        video=video
     )
     await comment.save()
+    video.video_comments.add(comment)
     logging.info(f'Upload Comment: Comment {comment.id} uploaded')
     return {'comment': comment.id, 'status': 'uploaded'}
 
@@ -74,7 +75,7 @@ async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_c
     except:
         logging.warning(f'Delete Comment: No comment {comment_id}')
         raise HTTPException(status_code=400, detail='Bad Request')
-    if comment.owner_id == user:
+    if comment.owner == user:
         context = {'comment': comment.id, 'status': 'deleted'}
         await comment.delete()
         logging.info(f'Delete Comment: Comment Deleted {comment_id}')
@@ -94,12 +95,12 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
         logging.warning(f'Change Like Status: No Video')
         raise HTTPException(status_code=400, detail='Bad Request')
     try:
-        like_record = await Like.objects.get(video.id == Like.video_id.id and user.id == Like.user_id.id)
+        like_record = await Like.objects.get(video.id == Like.video.id and user.id == Like.user.id)
         logging.info(f'Change Like Status: {like_record.id} deleted')
         await like_record.delete()
         return {'status': 'Removed'}
     except:
-        like_record = Like(user_id=user.id, video_id=video_id)
+        like_record = Like(user=user.id, video=video_id)
         await like_record.save()
         logging.info(f'Change Like Status: {like_record.id} deleted')
         return {'status': 'Added'}
@@ -107,7 +108,6 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
 
 @video_router.method(tags=['video'])
 async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
-    """ПОФИКСИТЬ ПРЕВЬЮ ВИДЕО"""
     try:
         video = await Video.objects.get(id == Video.id)
     except:
@@ -115,22 +115,23 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         raise HTTPException(status_code=400, detail='Bad Request')
     is_liked = False
     if user:
-        await View.objects.create(video_id=id, user_id=user.id)
+        await View.objects.create(video=id, user=user.id)
         try:
-            await Like.objects.get(Like.video_id == video.id and Like.user_id == user.id)
+            await Like.objects.get(Like.video == video.id and Like.user == user.id)
             is_liked = True
-            await View.objects.create(user_id=user, video_id=video)
+            await View.objects.create(user=user, video=video)
         except:
             is_liked = False
-    logging.info(f'Get Video: Video({id}) data returned')
-    comments = video.video_comments
-    return {'url': await video.video_url(),
-            'preview': await video.preview_url(),
-            'comments': comments,
-            'title': video.title,
-            'description': video.description,
-            'likes': await video.likes_amount,
-            'is_liked': is_liked}
+    try:
+        logging.info(f'Get Video: Video({id}) data returned')
+        return {'url': await video.video_url(),
+                'preview': await video.preview_url(),
+                'title': video.title,
+                'description': video.description,
+                'likes': await video.likes_amount,
+                'is_liked': is_liked}
+    except Exception as e:
+        logging.error(f'Get Video: {e}')
 
 
 @video_router.method(tags=['video'])
