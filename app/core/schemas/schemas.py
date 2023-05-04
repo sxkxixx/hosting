@@ -1,6 +1,6 @@
-from fastapi import File
+from fastapi import File, UploadFile, Form
 from pydantic import BaseModel, EmailStr, validator
-
+from typing import Optional
 
 class UserSchema(BaseModel):
     email: EmailStr
@@ -11,7 +11,7 @@ class UserRegister(UserSchema):
     username: str
     password_repeat: str
 
-    @validator('username', 'password_repeat', 'email')
+    @validator('username', 'password_repeat', 'email', 'password')
     def no_space_validator(cls, v, values, **kwargs):
         if ' ' in v:
             raise ValueError(f'No space in "{kwargs["field"].name.capitalize()}"')
@@ -29,11 +29,18 @@ class UserRegister(UserSchema):
 
 
 class VideoUploadSchema(BaseModel):
-    title: str
-    description: str
-    video_file: bytes = File(...)
+    title: str = Form(...)
+    description: str = Form(...)
+    video_file: UploadFile = File(...)
+    preview_file: Optional[UploadFile | None] = File(...)
 
 
 class CommentUploadSchema(BaseModel):
     video_id: int
     comment_text: str
+
+
+class ClaimSchema(BaseModel):
+    description: str
+    claim_type: str
+    claim_object_id: int

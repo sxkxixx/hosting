@@ -1,23 +1,11 @@
 import pytest_asyncio
+from fastapi import UploadFile, File, Form
 from app.main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
+from app.tests.utils import get_query_params, TEST_USER_EMAIL, TEST_USER_PASSWORD, url, TEST_VIDEO_ID
 
-TEST_USER_EMAIL = 'test@mail.com'
-TEST_USER_PASSWORD = 'secret'
-TEST_VIDEO_ID = 1
-
-
-def url(route):
-    return f'http://127.0.0.1:8000/api/v1/{route}'
-
-
-def get_query_params(method: str, body):
-    return {"jsonrpc": "2.0", "id": 0, "method": method, "params": body}
-
-
-# -p no:cacheprovider
 
 @pytest_asyncio.fixture()
 async def auth_tokens():
@@ -95,6 +83,62 @@ async def test_like_method_no_user():
     assert response.json()['detail'] == 'Unauthorized'
 
 
+# @pytest.mark.asyncio
+# async def test_upload_video(auth_tokens):
+#     with open('../static/video.mp4', mode='rb') as video, open('../static/test_preview.jpg', mode='rb') as preview:
+#         files = {'video_file': (video.name, UploadFile(video)), 'preview_file': (preview.name, UploadFile(preview)), 'title': 'test_video_upload', 'description': 'test_description'}
+#     async with LifespanManager(app):
+#         async with AsyncClient(app=app) as async_client:
+#             response = await async_client.post(url='http://127.0.0.1:8000/upload_video', data=files, cookies=auth_tokens)
+#
+#     assert response.status_code == 422
+#     assert response.json() == 'er'
+
+
 @pytest.mark.asyncio
-async def test():
-    pass
+async def test_get_video_data(auth_tokens):
+    query = get_query_params(method='get_video', body={'id': 1})
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response = await async_client.post(url('video'), json=query, cookies=auth_tokens)
+
+    assert response.status_code == 200
+    data = response.json()['result']
+    assert data['title'] == 'test'
+    assert data['description'] == 'description'
+
+
+@pytest.mark.asyncio
+async def test_get_video_no_video(auth_tokens):
+    query = get_query_params(method='get_video', body={'id': -1})
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response = await async_client.post(url('video'), json=query, cookies=auth_tokens)
+
+    assert response.status_code == 400
+    assert response.json()['detail'] == 'Bad Request'
+
+
+@pytest.mark.asyncio
+async def test_get_video_comments(auth_tokens):
+    query_comments = get_query_params(method='upload_comment',
+                                      body={'comment_data': {'video_id': 1, 'comment_text': 'Комментарий для тестов'}})
+    query = get_query_params(method='get_video', body={'id': 1})
+
+    async with LifespanManager(app):
+        async with AsyncClient(app=app) as async_client:
+            response_comment = await async_client.post(url('video'), json=query_comments, cookies=auth_tokens)
+            response_video = await async_client.post(url('video'), json=query, cookies=auth_tokens)
+            comment_id = response_comment.json()['result']['comment']
+            query_delete_comment = get_query_params(method='delete_comment', body={'comment_id': comment_id})
+            response = await async_client.post(url('video'), json=query_delete_comment, cookies=auth_tokens)
+
+    assert response_comment.status_code == 200
+    assert response_video.status_code == 200
+    comment = response_video.json()['result']['comments']
+    print(comment)
+    assert comment['id'] == comment_id
+
+    assert response.status_code == 200

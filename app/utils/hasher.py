@@ -2,8 +2,9 @@ import datetime
 from passlib.context import CryptContext
 from fastapi import Request, Response
 from jose import jwt
-from app.core.models.models import User
+from app.core.models.models import User, Comment, Video
 from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -56,3 +57,24 @@ async def get_current_user(request: Request, response: Response) -> User | None:
         except:
             return None
     return None
+
+
+async def get_object_by_id(object_type: str, object_id: int):
+    if object_type == 'comment':
+        try:
+            comment = await Comment.objects.get(Comment.id == object_id)
+        except:
+            return None
+        return {'id': comment.id, 'status': 'comment', 'comment_text': comment.comment_text}
+    elif object_type == 'video':
+        try:
+            video = await Video.objects.get(Video.id == object_id)
+        except:
+            return None
+        return {'id': video.id, 'status': 'video', 'title': video.title,
+                'description': video.description, 'url': video.video_url}
+
+
+def get_unique_name(filename: str):
+    extension = filename[filename.find('.'):]
+    return f'{os.urandom(10).hex()}.{extension}'
