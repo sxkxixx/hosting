@@ -8,3 +8,4 @@ Dockerfile
 docker-compose.yml
 **/__pycache__
 app/logs.log
+app/static
