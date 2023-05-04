@@ -1,3 +1,4 @@
+import logging
 import databases
 import ormar
 import sqlalchemy
@@ -5,6 +6,7 @@ from datetime import datetime
 from app.core.config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB
 from app.utils.s3_client import get_url, delete_object
 
+logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:5432/{POSTGRES_DB}'
 database = databases.Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()
@@ -43,10 +45,19 @@ class Video(ormar.Model):
     title: str = ormar.String(nullable=False, max_length=150)
     description: str = ormar.String(nullable=True, max_length=300)
     owner_id: User = ormar.ForeignKey(User, related_name='videos')
-    cloud_name: str = ormar.String(max_length=100, nullable=False, unique=True)
+    video_cloud_name: str = ormar.String(max_length=100, nullable=False, unique=True)
+    preview_cloud_name: str = ormar.String(max_length=100, nullable=True, unique=True)
 
-    async def url(self):
-        return await get_url(self.cloud_name)
+    async def video_url(self):
+        return await get_url(self.video_cloud_name)
+
+    async def preview_url(self):
+        try:
+            url = await get_url(self.preview_cloud_name)
+        except Exception as e:
+            logging.info(f'Preview Url: No Preview for {self.id}-id video')
+            url = None
+        return url
 
     @property
     async def likes_amount(self):
@@ -56,7 +67,8 @@ class Video(ormar.Model):
             return 0
 
     async def delete_from_s3(self):
-        await delete_object(self.cloud_name)
+        await delete_object(self.video_cloud_name)
+        await delete_object(self.preview_cloud_name)
 
 
 class Like(ormar.Model):

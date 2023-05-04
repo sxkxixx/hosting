@@ -38,7 +38,7 @@ async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
 async def admin_claims(admin: User = Depends(get_current_user)) -> list[dict]:
     if not admin.is_superuser:
         raise HTTPException(status_code=400, detail='Bad Request')
-    claims = await Claim.objects.filter(status='sent').to_dict
+    claims = await Claim.objects.filter(status='sent')
     return [{'claim_id': claim.id, 'description': claim.description,
              'claim_type': claim.claim_type, 'owner': claim.owner.id,
              'claim_object_id': claim.claim_object_id, 'status': claim.status} for claim in claims]

@@ -1,6 +1,6 @@
-from fastapi import File
+from fastapi import File, UploadFile, Form
 from pydantic import BaseModel, EmailStr, validator
-
+from typing import Optional
 
 class UserSchema(BaseModel):
     email: EmailStr
@@ -29,9 +29,10 @@ class UserRegister(UserSchema):
 
 
 class VideoUploadSchema(BaseModel):
-    title: str
-    description: str
-    video_file: bytes = File(...)
+    title: str = Form(...)
+    description: str = Form(...)
+    video_file: UploadFile = File(...)
+    preview_file: Optional[UploadFile | None] = File(...)
 
 
 class CommentUploadSchema(BaseModel):

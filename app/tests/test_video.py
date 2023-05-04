@@ -1,4 +1,5 @@
 import pytest_asyncio
+from fastapi import UploadFile, File, Form
 from app.main import app
 import pytest
 from httpx import AsyncClient
@@ -82,6 +83,13 @@ async def test_like_method_no_user():
     assert response.json()['detail'] == 'Unauthorized'
 
 
-@pytest.mark.asyncio
-async def test():
-    pass
+# @pytest.mark.asyncio
+# async def test_upload_video(auth_tokens):
+#     with open('../static/video.mp4', mode='rb') as video, open('../static/test_preview.jpg', mode='rb') as preview:
+#         files = {'video_file': (video.name, UploadFile(video)), 'preview_file': (preview.name, UploadFile(preview)), 'title': 'test_video_upload', 'description': 'test_description'}
+#     async with LifespanManager(app):
+#         async with AsyncClient(app=app) as async_client:
+#             response = await async_client.post(url='http://127.0.0.1:8000/upload_video', data=files, cookies=auth_tokens)
+#
+#     assert response.status_code == 422
+#     assert response.json() == 'er'

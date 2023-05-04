@@ -5,13 +5,6 @@ from app.core.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, REGION_NAM
 
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
-# s3_client = boto3.client(
-#     service_name='s3',
-#     endpoint_url='https://storage.yandexcloud.net',
-#     region_name=REGION_NAME,
-#     aws_access_key_id=AWS_ACCESS_KEY_ID,
-#     aws_secret_access_key=AWS_SECRET_ACCESS_KEY
-# )
 
 async_s3_session = aioboto3.Session(
     aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -20,7 +13,7 @@ async_s3_session = aioboto3.Session(
 )
 
 
-async def upload_video(file, file_name: str):
+async def upload_file(file, file_name: str):
     uploaded = False
     async with async_s3_session.client('s3', endpoint_url='https://storage.yandexcloud.net') as s3:
         try:
@@ -42,7 +35,7 @@ async def get_url(cloud_name):
     return url
 
 
-def delete_object(cloud_name):
+async def delete_object(cloud_name):
     async with async_s3_session.client('s3', endpoint_url='https://storage.yandexcloud.net') as s3:
         response = await s3.delete_object(Bucket=BUCKET_NAME, Key=cloud_name)
     return response

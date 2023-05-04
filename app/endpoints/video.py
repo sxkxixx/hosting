@@ -1,8 +1,10 @@
+from typing import Optional
+
 import fastapi_jsonrpc as jsonrpc
-from fastapi import File, HTTPException, Request, Response, Depends, Body
+from fastapi import HTTPException, Request, Response, Depends, Body, Form, UploadFile, File
 from app.core.models.models import User, Video, Comment, Like, View
-from app.utils.hasher import get_current_user
-from app.utils.s3_client import upload_video
+from app.utils.hasher import get_current_user, get_unique_name
+from app.utils.s3_client import upload_file
 from app.core.schemas.schemas import VideoUploadSchema, CommentUploadSchema
 import logging
 
@@ -12,36 +14,34 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.post('/upload_video', tags=['video'])
-async def upload_video(request: Request, response: Response):
+async def upload_video(request: Request, response: Response, title: str = Form(...),
+                       description: str = Form(...),
+                       video_file: UploadFile = File(...),
+                       preview_file: Optional[UploadFile | None] = File(...)):
     user = await get_current_user(request, response)
     if not user:
         logging.warning(f'Upload Video: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
-    form = await request.form()
     try:
-        VideoUploadSchema(**form)
-    except:
-        logging.error(f'Upload Video: Incorrect data of video schema: {form}')
-        HTTPException(status_code=400, detail='Bad Request')
-
-    title, description = form.get('title'), form.get('description')
-    file: File(...) = form.get('file')
-    try:
-        user = await User.objects.get(User.id == user.id)
-        result = await upload_video(file)
+        cloud_video_name = 'videos/' + get_unique_name(filename=video_file.filename)
+        result = await upload_file(video_file, cloud_video_name)
         if not result:
             raise HTTPException(status_code=400, detail='Bad Request')
+        preview_cloud_name = None
+        if preview_file:
+            preview_cloud_name = 'previews/' + get_unique_name(preview_file.filename)
+            await upload_file(preview_file, preview_cloud_name)
         video = Video(
             title=title, description=description,
-            owner_id=user.id, cloud_name=f'{user.id}{file.filename}'
+            owner_id=user.id, video_cloud_name=cloud_video_name, preview_cloud_name=preview_cloud_name
         )
         await video.save()
-        url = await video.url()
+        url = await video.video_url()
         logging.info(f'Upload Video: Video {video.id} successfully uploaded')
-        return Response({'status': 200, 'url': f'{url}'})
-    except:
-        logging.error(f'Upload Video: Something went wrong')
-        HTTPException(status_code=400, detail='Bad Request')
+        return {'status': 200, 'url': f'{url}'}
+    except Exception as e:
+        logging.error(f'Upload Video: Something went wrong {e}')
+        HTTPException(status_code=400, detail='e')
 
 
 @video_router.method(tags=['video'])
@@ -107,6 +107,7 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
 
 @video_router.method(tags=['video'])
 async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
+    """ПОФИКСИТЬ ПРЕВЬЮ ВИДЕО"""
     try:
         video = await Video.objects.get(id == Video.id)
     except:
@@ -122,7 +123,7 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         except:
             is_liked = False
     logging.info(f'Get Video: Video({id}) data returned')
-    return {'url': video.url,
+    return {'url': video.video_url,
             'comments': [{'user': await User.objects.get(User.id == comment.owner_id).username,
                           'comment_text': comment.comment_text,
                           'created_at': comment.created_at} for comment in video.video_comments],
@@ -133,7 +134,7 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
 
 
 @video_router.method(tags=['video'])
-async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user)):
+async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Delete Video: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
