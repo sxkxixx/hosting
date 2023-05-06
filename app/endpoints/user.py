@@ -18,7 +18,7 @@ async def register(user: UserRegister) -> dict:
     try:
         user_by_data = await User.objects.filter((User.email == email) | (User.username == username)).get()
         logging.warning(f'Register: User {user_by_data.email} already exist')
-    except:
+    except Exception as e:
         user_by_data = None
     if user_by_data or password != password_repeat:
         logging.warning(f'Register: Bad try to register a user')
@@ -34,8 +34,8 @@ async def register(user: UserRegister) -> dict:
         await user.save()
         logging.info(f'User {user.email} created')
         return {'detail': 'Пользователь {} успешно создан'.format(user.email)}
-    except:
-        logging.error('Register: Something went wrong')
+    except Exception as e:
+        logging.error(f'Register: {e}')
         raise HTTPException(status_code=400, detail='Bad Request')
 
 
@@ -58,8 +58,8 @@ async def login(response: Response, user: UserSchema) -> dict:
             return {'user': user.email, 'status': 'Authorized'}
         logging.warning(f'Login: Incorrect password for {user.email}')
         raise HTTPException(status_code=400, detail='Bad Request')
-    except:
-        logging.error(f'Login: Something went wrong')
+    except Exception as e:
+        logging.error(f'Login: {e}')
         raise HTTPException(status_code=400, detail='Bad Request')
 
 
@@ -95,14 +95,18 @@ async def create_claim(claim: ClaimSchema, user: User = Depends(get_current_user
     if not user:
         logging.warning('Send Claim: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
-    claim_ = Claim(
-        description=claim.description,
-        claim_type=claim.claim_type,
-        owner=user,
-        claim_object_id=claim.claim_object_id
-    )
-    await claim_.save()
-    return {'claim': {'id': claim_.id, 'description': claim_.description}, 'status': 'created'}
+    try:
+        claim_ = Claim(
+            description=claim.description,
+            claim_type=claim.claim_type,
+            owner=user,
+            claim_object_id=claim.claim_object_id
+        )
+        await claim_.save()
+        return {'claim': {'id': claim_.id, 'description': claim_.description}, 'status': 'created'}
+    except Exception as e:
+        logging.error(f'Create Claim: {e}')
+        raise HTTPException(status_code=400, detail='Bad Request')
 
 
 @user_route.method(tags=['user'])

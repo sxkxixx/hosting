@@ -96,7 +96,7 @@ class View(ormar.Model):
         tablename = 'views'
 
     id: int = ormar.Integer(primary_key=True)
-    user: User = ormar.ForeignKey(User, related_name='viewed_videos')
+    user: User = ormar.ForeignKey(User, related_name='viewed_videos', nullable=True)
     video: Video = ormar.ForeignKey(Video, related_name='user_views')
 
 
