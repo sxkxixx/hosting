@@ -63,7 +63,8 @@ class Video(ormar.Model):
     async def likes_amount(self):
         try:
             return await Like.objects.filter(Like.video.id == self.id).count()
-        except:
+        except Exception as e:
+            logging.info(f'Likes Amount: {e}')
             return 0
 
     async def delete_from_s3(self):

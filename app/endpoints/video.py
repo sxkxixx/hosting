@@ -69,14 +69,14 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
     except Exception as e:
         logging.warning(f'Upload Comment: No Video: {e}')
         raise HTTPException(status_code=400, detail='Bad Request')
-    comment = Comment(
+    comment = await Comment(
         comment_text=comment_data.comment_text,
         owner=user,
         video=video
-    )
-    await comment.save()
-    video.video_comments.add(comment)
+    ).save()
+    # await video.video_comments.add(comment)
     logging.info(f'Upload Comment: Comment {comment.id} uploaded')
+    logging.info(comment)
     return {'comment': comment.id, 'status': 'uploaded'}
 
 
@@ -139,11 +139,17 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
             is_liked = False
     try:
         logging.info(f'Get Video: Video({id}) data returned')
-        return {'url': await video.video_url(),
-                'preview': await video.preview_url(),
-                'title': video.title,
-                'description': video.description,
-                'likes': await video.likes_amount,
+        comments = await video.video_comments.all()
+        return {'video': {
+            'url': await video.video_url(),
+            'title': video.title,
+            'description': video.description,
+            'likes': await video.likes_amount,
+        },
+                'comments': [{'id': comment.id,
+                              'owner': (await User.objects.get(User.id == comment.owner.id)).email,
+                              'text': comment.comment_text,
+                              'created_at': comment.created_at} for comment in comments],
                 'is_liked': is_liked}
     except Exception as e:
         logging.error(f'Get Video: {e}')
