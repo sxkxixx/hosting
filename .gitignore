@@ -4,8 +4,9 @@
 Readme.md
 database.db
 .env
-Dockerfile
 docker-compose.yml
+front/node_modules
 **/__pycache__
 app/logs.log
 app/static
+.env-extra
