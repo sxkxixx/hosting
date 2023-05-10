@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SECRET_KEY: str = getenv('SECRET_KEY')
-ALGORITHM: str = getenv('ALGORITHM')
+SECRET_KEY = getenv('SECRET_KEY')
+ALGORITHM = getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 5
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 60 * 2
 AWS_ACCESS_KEY_ID = getenv('AWS_ACCESS_KEY_ID')

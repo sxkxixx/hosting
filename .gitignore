@@ -10,3 +10,4 @@ front/node_modules
 app/logs.log
 app/static
 .env-extra
+.dockerignore

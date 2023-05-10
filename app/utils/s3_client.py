@@ -1,5 +1,4 @@
 import logging
-# import boto3
 import aioboto3
 from app.core.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, REGION_NAME, BUCKET_NAME
 
