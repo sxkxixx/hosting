@@ -3,10 +3,7 @@
     flex-direction: column; 
     height: 100vh;
     position: relative;
-    margin: 0;
-    margin-top: 28px;
-    margin-left: 142px;
-    margin-right: 142px;
+    margin: 28px 142px 0;
     padding:0;
     font-family: "Roboto", sans-serif;
     font-size: 16px;

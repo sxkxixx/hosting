@@ -1,18 +1,16 @@
 import './App.css'
 import { MainPage } from './components/MainPage/MainPage';
-import { OpenVideo } from './components/OpenVideo/OpenVideo';
-import { AuthorizedProfilePage } from './components/ProfilePage/AuthorizedProfilePage';
-import { UnauthorizedProfilePage } from './components/ProfilePage/UnauthorizedProfilePage';
+import OpenVideo from './components/OpenVideo/OpenVideo';
+import { Profile } from './components/ProfilePage/Profile';
 import {Route, Routes} from 'react-router-dom'
 
-function App() {
+const App = () => {
   return (
     <div className="App">
       <Routes>
         <Route path="/" element={<MainPage/>}></Route>
-        <Route path="authProfilePage" element={<AuthorizedProfilePage/>}></Route>
-        <Route path="unauthProfilePage" element={<UnauthorizedProfilePage/>}></Route>
-        <Route path="openVideo" element={<OpenVideo/>}></Route>
+        <Route path="/profile" element={<Profile/>}></Route>
+        <Route path="/watch/:id" element={<OpenVideo/>}></Route>
       </Routes>
     </div>
   );
