@@ -5,7 +5,7 @@ import VideoCard from "../VideoCard/VideoCard";
 import UploadVideo from "../UploadVideo/UploadVideo";
 import array from "../utils";
 
-export const Profile =  () => {
+const Profile =  () => {
   const navigate = useNavigate();
 
   const videos = array.map((video) =>
@@ -41,3 +41,5 @@ export const Profile =  () => {
     </div>
     )
 }
+
+export default Profile;

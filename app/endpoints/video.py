@@ -141,16 +141,17 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         logging.info(f'Get Video: Video({id}) data returned')
         comments = await video.video_comments.all()
         return {'video': {
+            'owner': (await User.objects.get(User.id == video.owner.id)).email,
             'url': await video.video_url(),
             'title': video.title,
             'description': video.description,
             'likes': await video.likes_amount,
         },
-                'comments': [{'id': comment.id,
-                              'owner': (await User.objects.get(User.id == comment.owner.id)).email,
-                              'text': comment.comment_text,
-                              'created_at': comment.created_at} for comment in comments],
-                'is_liked': is_liked}
+            'comments': [{'id': comment.id,
+                          'owner': (await User.objects.get(User.id == comment.owner.id)).email,
+                          'text': comment.comment_text,
+                          'created_at': comment.created_at} for comment in comments],
+            'is_liked': is_liked}
     except Exception as e:
         logging.error(f'Get Video: {e}')
 
