@@ -78,14 +78,15 @@ async def profile(user: User = Depends(get_current_user)) -> dict:
         logging.warning(f'Profile: No user')
         raise HTTPException(status_code=401, detail='Unauthorized')
     try:
-        videos = await Video.objects.filter(User.id == Video.owner_id).fields(['id', 'title']).all()
-    except:
+        videos = await Video.objects.filter(user.id == Video.owner.id).all()
+    except Exception as e:
+        logging.error(f'{e}')
         videos = []
     logging.info(f'Profile: {user.email}: {list(videos)}')
     context = {
         'username': user.username,
         'email': user.email,
-        'videos': [{'id': video.id, 'title': video.title} for video in videos]
+        'videos': [{'id': video.id, 'title': video.title, 'preview': await video.preview_url()} for video in videos]
     }
     return context
 

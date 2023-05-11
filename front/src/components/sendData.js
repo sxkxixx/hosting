@@ -1,7 +1,15 @@
 const getAxiosBody = (method, params) => {
-    return {
-        "jsonrpc": "2.0",
+    if (!params){
+        return {
         "id": 0,
+        "jsonrpc": "2.0",
+        "method": method,
+        "params": {}
+        }
+    }
+    return {
+        "id": 0,
+        "jsonrpc": "2.0",
         "method": method,
         "params": {
             ...params

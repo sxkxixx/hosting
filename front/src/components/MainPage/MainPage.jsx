@@ -1,21 +1,37 @@
 import styles from './MainPage.module.css';
 import SearchBar from "../SearchBar/SearchBar";
 import VideoCard from "../VideoCard/VideoCard";
-import array from "../utils";
+import React, {useEffect, useState} from "react";
+import getAxiosBody from "../sendData";
+import axios from "axios";
 
 
 export const MainPage = () => {
-  const videos = array.slice().map((video) =>
-    <li className={styles.video_preview_container}><VideoCard id={video.id} title={video.title} preview={video.preview}/></li>
-  )
+  const [videos, setVideos] = useState([]);
+  const [user, setUser] = useState('')
 
+  useEffect( () => {
+    const body = getAxiosBody('main_page')
+    const instance = axios.create({withCredentials: true})
+
+    instance.post('http://127.0.0.1:8000/api/v1/video', body)
+        .then(response => {
+          setVideos(response.data['result'].videos);
+          setUser(response.data['result'].user);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+  }, []);
+
+  const data = videos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview}/>);
 
   return (
   <div>
     <SearchBar/>
-    <ul className={styles.videos_container}>
-      {videos}
-    </ul>
+    <div className={styles.videos_container}>
+      {data}
+    </div>
   </div>
   )
 }

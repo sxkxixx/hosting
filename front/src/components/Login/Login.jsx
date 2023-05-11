@@ -2,9 +2,11 @@ import styles from './Login.module.css';
 import React, {useState} from "react";
 import getAxiosBody from "../sendData";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -47,7 +49,7 @@ const Login = () => {
     const instance = axios.create({withCredentials: true})
     instance.post('http://127.0.0.1:8000/api/v1/user', data)
         .then(response => {
-          console.log(response.data);
+          navigate('/profile');
         })
         .catch(error => {
           console.log(error);

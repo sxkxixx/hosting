@@ -8,6 +8,7 @@ import {useParams} from "react-router-dom";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import Comment from "../Comment/Comment";
+import {Player} from "video-react";
 
 const OpenVideo = () => {
   const [isLiked, setIsLiked] = useState(false);
@@ -39,7 +40,7 @@ const OpenVideo = () => {
       <SearchBar/>
       <div className={styles.main}>
         <div className={styles.render}>
-          <div className={styles.big_video} name='big-video'></div>
+          <Player playsInline src={video.url}/>
           <div className={styles.users_info_and_likes}>
             <button className={styles.user_profile_icon_render} alt=''><UserAvatar/></button>
             <p className={styles.user_name}>{video.owner}</p>

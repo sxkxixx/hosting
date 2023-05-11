@@ -13,19 +13,24 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])
-async def main_page(user: User = Depends(get_current_user)) -> dict:
-    videos = await Video.objects.select_related('user_views').order_by('-user_views__count').all()
-    return {
-        'user': user.email if user else None,
-        'videos': [{
-            'id': video.id,
-            'title': video.title,
-            'owner': {
-                'id': video.owner.id,
-                'email': video.owner.email
-            }
-        } for video in videos]
-    }
+async def main_page(user: User = Depends(get_current_user)) -> dict | None:
+    try:
+        # videos = await Video.objects.select_related('user_views').order_by('-user_views__count').all()
+        videos = await Video.objects.all()
+        return {
+            'user': user.email if user else None,
+            'videos': [{
+                'id': video.id,
+                'title': video.title,
+                'preview': await video.preview_url(),
+                'owner': {
+                    'id': video.owner.id,
+                    'email': (await User.objects.get(User.id == video.owner.id)).email
+                }
+            } for video in videos[:8]]
+        }
+    except Exception as e:
+        logging.error(f'{e}')
 
 
 @video_router.post('/upload_video', tags=['video'])
