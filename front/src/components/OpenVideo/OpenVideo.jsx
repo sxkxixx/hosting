@@ -8,12 +8,15 @@ import {useParams} from "react-router-dom";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import Comment from "../Comment/Comment";
-import {Player} from "video-react";
+import VideoPlayer from "../VideoPLayer/VideoPlayer";
 
 const OpenVideo = () => {
   const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState(0);
   const [video, setVideo] = useState([]);
   const [comments, setComments] = useState([]);
+
+  const [commentText, setCommentText] = useState('');
 
   const {id} = useParams();
 
@@ -25,11 +28,49 @@ const OpenVideo = () => {
           setComments(response.data['result'].comments)
           setVideo(response.data['result'].video)
           setIsLiked(response.data['result'].is_liked)
+          setLikes(response.data['result'].video['likes']);
+          document.title = video['title'];
         })
         .catch(err => {
           console.log(err);
         })
-  }, [])
+  }, []);
+
+  const setRemoveLike = () => {
+      const body = getAxiosBody('change_like_status', {'video_id': Number(id)})
+      const instance = axios.create({withCredentials: true});
+      instance.post('http://127.0.0.1:8000/api/v1/video', body)
+          .then((response) => {
+              const data = response.data['result'];
+              if (data['status'] === 'Added') {
+                  setLikes(likes + 1);
+              }
+              else {
+                setLikes(likes - 1);
+              }
+          })
+          .catch((err) => {
+              console.log(err);
+          });
+  };
+
+  const handleCommentTextChange = event => setCommentText(event.target.value);
+
+  const sendComment = (event) => {
+      event.preventDefault();
+      if (!commentText)
+          return;
+      const body = getAxiosBody('upload_comment', {comment_data: {video_id: Number(id), comment_text: commentText}})
+      const instance = axios.create({withCredentials: true});
+      instance.post('http://127.0.0.1:8000/api/v1/video', body)
+          .then((response) => {
+              const data = response.data['result'];
+              setComments([...comments, {id: data['comment'], owner: data['user'], text: commentText}])
+              setCommentText('');
+          })
+          .catch()
+          .finally(() => event.target.reset());
+  };
 
   const commentList = comments.slice().map(comment =>
     <Comment id={comment.id} owner={comment.owner} text={comment.text}/>
@@ -40,11 +81,13 @@ const OpenVideo = () => {
       <SearchBar/>
       <div className={styles.main}>
         <div className={styles.render}>
-          <Player playsInline src={video.url}/>
+          <div>
+            <VideoPlayer id={id} src={video.url} preview={video.preview}/>
+          </div>
           <div className={styles.users_info_and_likes}>
-            <button className={styles.user_profile_icon_render} alt=''><UserAvatar/></button>
+            <button className={styles.user_profile_icon_render}><UserAvatar/></button>
             <p className={styles.user_name}>{video.owner}</p>
-            <button type="button" className={styles.likes_btn}><Like/>{video.likes}</button>
+            <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
           </div>
           <div className={styles.description_box} name='description-box'>
             <p className={styles.title_video}>{video.title}</p>
@@ -58,8 +101,8 @@ const OpenVideo = () => {
               {commentList}
             </div>
             <form className={styles.comment_form} action="" method="post">
-              <input className={styles.comment_input} placeholder="Напишите комментарий"/>
-              <button className={styles.comment_send_btn} type='submit'><Arrow/></button>
+              <input className={styles.comment_input} onChange={handleCommentTextChange} placeholder="Напишите комментарий"/>
+              <button className={styles.comment_send_btn} onClick={sendComment} type='submit'><Arrow/></button>
             </form>
           </div>
       </div>

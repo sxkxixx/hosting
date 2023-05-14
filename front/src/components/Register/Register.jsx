@@ -4,86 +4,85 @@ import getAxiosBody from "../sendData";
 import axios from "axios";
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [passwordR, setPasswordR] = useState('');
+    document.title = 'Sign Up';
+    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [passwordR, setPasswordR] = useState('');
 
-  const [emailError, setEmailError] = useState('');
-  const [usernameError, setUsernameError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [passwordRError, setPasswordRError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [usernameError, setUsernameError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordRError, setPasswordRError] = useState('');
 
-  const validateEmail = email => {
-    const emailRegex = /^\S+@\S+\.\S+$/;
-    if (!email) {
-      setEmailError('Email is required');
-    } else if (!emailRegex.test(email)) {
-      setEmailError('Please enter a valid email');
-    } else {
-      setEmailError('');
-    }
-  };
-
-  const validateUsername = username => {
-    if (!username) {
-      setUsernameError('Username is required');
-    } else if (username.length < 6) {
-      setUsernameError('Username must be at least 6 characters long');
-    } else {
-      setUsernameError('');
-    }
-  };
-
-  const validatePassword = password => {
-    if (!password) {
-      setPasswordError('Password is required');
-    } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters long');
-    }
-    else {
-      setPasswordError('');
-    }
-  };
-
-  const validatePasswordR = passwordR => {
-    if (passwordR !== password){
-      setPasswordRError('Passwords must be equals!');
-    }
-  }
-
-  const handleSubmit = async event => {
-    event.preventDefault();
-    validateEmail(email);
-    validateUsername(username);
-    validatePassword(password);
-    validatePasswordR(passwordR);
-    if (emailError || usernameError || passwordError || passwordRError) {
-      return;
-    }
-    const data = getAxiosBody('register',
-        {'user': {'email': email,
-                'username':username,
-                'password':password,
-                'password_repeat':passwordR
-              }
+    const validateEmail = email => {
+        const emailRegex = /^\S+@\S+\.\S+$/;
+        if (!email) {
+            setEmailError('Email is required');
+        } else if (!emailRegex.test(email)) {
+            setEmailError('Please enter a valid email');
+        } else {
+            setEmailError('');
         }
-        )
-    axios.post('http://127.0.0.1:8000/api/v1/user', data)
-        .then((response) => {
-          console.log(response.data)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
+    };
 
+    const validateUsername = username => {
+        if (!username) {
+            setUsernameError('Username is required');
+        } else if (username.length < 6) {
+            setUsernameError('Username must be at least 6 characters long');
+        } else {
+            setUsernameError('');
+        }
+    };
 
-  };
+    const validatePassword = password => {
+        if (!password) {
+            setPasswordError('Password is required');
+        } else if (password.length < 6) {
+            setPasswordError('Password must be at least 6 characters long');
+        }
+        else {
+            setPasswordError('');
+        }
+    };
 
-  const handleEmailChange = event => setEmail(event.target.value);
-  const handleUsernameChange = event => setUsername(event.target.value);
-  const handlePasswordChange = event => setPassword(event.target.value);
-  const handlePasswordRChange = event => setPasswordR(event.target.value);
+    const validatePasswordR = passwordR => {
+        if (passwordR !== password) {
+            setPasswordRError('Passwords must be equals!');
+        }
+    };
+
+    const handleSubmit = async event => {
+        event.preventDefault();
+        validateEmail(email);
+        validateUsername(username);
+        validatePassword(password);
+        validatePasswordR(passwordR);
+        if (emailError || usernameError || passwordError || passwordRError) {
+          return;
+        }
+        const data = getAxiosBody('register',
+            {'user': {'email': email,
+                    'username':username,
+                    'password':password,
+                    'password_repeat':passwordR
+                  }
+            }
+            )
+        axios.post('http://127.0.0.1:8000/api/v1/user', data)
+            .then((response) => {
+              console.log(response.data)
+            })
+            .catch((error) => {
+              console.log(error)
+            })
+    };
+
+    const handleEmailChange = event => setEmail(event.target.value);
+    const handleUsernameChange = event => setUsername(event.target.value);
+    const handlePasswordChange = event => setPassword(event.target.value);
+    const handlePasswordRChange = event => setPasswordR(event.target.value);
 
 
   return (

@@ -6,6 +6,8 @@ import {useNavigate} from "react-router-dom";
 
 
 const Login = () => {
+  document.title = 'Log In'
+
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -55,7 +57,6 @@ const Login = () => {
           console.log(error);
         })
   };
-
 
   return (
     <form onSubmit={handleSubmit}>

@@ -1,6 +1,6 @@
 import styles from './Profile.module.css';
 import { ReactComponent as UserAvatar } from '../../img/user-avatar.svg';
-import { useNavigate } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import VideoCard from "../VideoCard/VideoCard";
 import UploadVideo from "../UploadVideo/UploadVideo";
 import {useEffect, useState} from "react";
@@ -39,7 +39,7 @@ const Profile =  () => {
     };
 
   const videoList = videos.map((video) =>
-      <VideoCard id={video.id} title={video.title} preview={video.preview}/>
+      <Link to={`/watch/${video.id}`}><VideoCard id={video.id} title={video.title} preview={video.preview}/></Link>
   )
 
   return (
@@ -48,8 +48,8 @@ const Profile =  () => {
         <div className={styles.user_info}>
           <button className={styles.user_avatar} type="button"><UserAvatar/></button>
           <div className={styles.user_info_profile}>
-            <p className={styles.user_name}>@{user.username}</p>
-            <p className={styles.user_email}>{user.email}</p>
+            <p className={styles.user_name}>Username: {user.username}</p>
+            <p className={styles.user_email}>Email: {user.email}</p>
           </div>
         </div>
         <h3 className=''>Мои видео:</h3>
