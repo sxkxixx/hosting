@@ -1,7 +1,7 @@
 import './App.css'
 import { MainPage } from './components/MainPage/MainPage';
 import OpenVideo from './components/OpenVideo/OpenVideo';
-import Profile from './components/ProfilePage/Profile';
+import Profile from './components/Profile/Profile';
 import {Route, Routes} from 'react-router-dom'
 import Register from "./components/Register/Register";
 import Login from "./components/Login/Login";
