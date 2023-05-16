@@ -51,7 +51,7 @@ const Login = () => {
     const instance = axios.create({withCredentials: true})
     instance.post('http://127.0.0.1:8000/api/v1/user', data)
         .then(response => {
-          navigate('/profile');
+          navigate('/');
         })
         .catch(error => {
           console.log(error);
@@ -59,19 +59,23 @@ const Login = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
+      <div className={styles.container}>
+        <form className={styles.form} onSubmit={handleSubmit}>
+      <h1 className={styles.title}>Log In</h1>
+      <label className={styles.label}>
         Email:
-        <input type="text" value={email} onChange={handleEmailChange} />
+        <input className={styles.input} type="text" value={email} onChange={handleEmailChange} />
         {emailError && <div style={{ color: 'red' }}>{emailError}</div>}
       </label><br/>
-      <label>
+      <label className={styles.label}>
         Password:
-        <input type="password" value={password} onChange={handlePasswordChange} />
+        <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
         {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
       </label><br/>
-      <button type="submit">Submit</button>
+      <button className={styles.btn} type="submit">Submit</button>
     </form>
+      </div>
+
   );
 };
 

@@ -28,7 +28,7 @@ async def main_page(user: User = Depends(get_current_user)) -> dict | None:
                     'id': video.owner.id,
                     'email': (await User.objects.get(User.id == video.owner.id)).email
                 }
-            } for video in videos[:8]]
+            } for video in videos]
         }
     except Exception as e:
         logging.error(f'{e}')

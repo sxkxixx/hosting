@@ -22,9 +22,9 @@ const Profile =  () => {
                 throw new Error();
             })
             .then((data) => {
-                console.log(data['result'])
                 setVideos(data['result']['videos'])
                 setUser({'username': data['result'].username, 'email': data['result'].email});
+                document.title = data['result'].email;
             })
             .catch((err) => {
                 navigate('/login');
@@ -36,10 +36,12 @@ const Profile =  () => {
         const body = getAxiosBody('logout');
         const instance = axios.create({withCredentials: true});
         await instance.post('http://127.0.0.1:8000/api/v1/user', body);
+        localStorage.removeItem('user');
     };
+    console.log(videos)
 
   const videoList = videos.map((video) =>
-      <Link to={`/watch/${video.id}`}><VideoCard id={video.id} title={video.title} preview={video.preview}/></Link>
+      <Link to={`/watch/${video.id}`}><VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email}/></Link>
   )
 
   return (

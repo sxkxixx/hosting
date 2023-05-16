@@ -86,29 +86,32 @@ const Register = () => {
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label>
+      <div className={styles.container}>
+          <form className={styles.form} onSubmit={handleSubmit}>
+        <h1 className={styles.title}>Sign Up</h1>
+      <label className={styles.label}>
         Email:
-        <input type="text" value={email} onChange={handleEmailChange} />
+        <input className={styles.input} type="text" value={email} onChange={handleEmailChange} />
         {emailError && <div style={{ color: 'red' }}>{emailError}</div>}
       </label><br/>
-      <label>
+      <label className={styles.label}>
         Username:
-        <input type="text" value={username} onChange={handleUsernameChange} />
+        <input className={styles.input} type="text" value={username} onChange={handleUsernameChange} />
         {usernameError && <div style={{ color: 'red' }}>{usernameError}</div>}
       </label><br/>
-      <label>
+      <label className={styles.label}>
         Password:
-        <input type="password" value={password} onChange={handlePasswordChange} />
+        <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
         {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
       </label><br/>
-      <label>
+      <label className={styles.label}>
         Repeat your password:
-        <input type="password" value={passwordR} onChange={handlePasswordRChange} />
+        <input className={styles.input} type="password" value={passwordR} onChange={handlePasswordRChange} />
         {passwordRError && <div style={{ color: 'red' }}>{passwordRError}</div>}
       </label><br/>
-      <button type="submit">Submit</button>
+      <button className={styles.btn} type="submit">Submit</button>
     </form>
+      </div>
   );
 };
 

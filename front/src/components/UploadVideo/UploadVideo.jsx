@@ -45,17 +45,19 @@ const UploadVideo = () => {
 
     return <form className={styles.upload_video_form} method="post" onSubmit={handleSubmit}>
         <textarea className={`${styles.upload_textarea} ${styles.upload_title_textarea}`} onChange={handleTitleChange} placeholder="Введите название"/>
-        <textarea className={`${styles.upload_textarea} ${styles.upload_description_textarea}`} onChange={handleDescriptionChange} placeholder="Введите описание"/>
-        <label className={styles.input_file}>
-            <input type="file" name="file[]" accept="image/*" onChange={handlePreviewChange}></input>
-            <span>{preview ? preview.name : 'Прикрепите превью'}</span>
-        </label>
-        <label className={styles.input_file}>
-            <input type="file" name="file[]" accept="video/*" onChange={handleVideoChange}></input>
-            <span>{video ? video.name : 'Прикрепите видео'}</span>
-        </label>
-        <div className={styles.input_file_list}></div>
-        <button type="submit">Загрузить</button>
+        <textarea className={`${styles.upload_textarea} ${styles.upload_description_textarea}`} onChange={handleDescriptionChange} placeholder="Введите описание"
+        cols="10" rows="5"/>
+        <div className={styles.container}>
+            <label className={styles.input_file}>
+                <input type="file" name="file[]" accept="image/*" onChange={handlePreviewChange}></input>
+                <span>{preview ? 'Файл прикреплен' : 'Прикрепите превью'}</span>
+            </label>
+            <label className={styles.input_file}>
+                <input className={styles.input} type="file" name="file[]" accept="video/*" onChange={handleVideoChange}></input>
+                <span>{video ? 'Видео прикреплено' : 'Прикрепите видео'}</span>
+            </label>
+        </div>
+        <button className={styles.btn} type="submit">Загрузить</button>
     </form>;
 };
 

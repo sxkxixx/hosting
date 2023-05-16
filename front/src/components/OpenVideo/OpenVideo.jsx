@@ -81,9 +81,9 @@ const OpenVideo = () => {
       <SearchBar/>
       <div className={styles.main}>
         <div className={styles.render}>
-          <div>
-            <VideoPlayer id={id} src={video.url} preview={video.preview}/>
-          </div>
+            <div className={styles.video_player}>
+                <VideoPlayer id={id} src={video.url} preview={video.preview}/>
+            </div>
           <div className={styles.users_info_and_likes}>
             <button className={styles.user_profile_icon_render}><UserAvatar/></button>
             <p className={styles.user_name}>{video.owner}</p>

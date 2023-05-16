@@ -12,15 +12,21 @@ const SearchBar = () => {
 
 
   useEffect(() => {
+      if (localStorage.getItem('user') !== null) {
+          setIsAuth(true);
+          return;
+      }
       const body = getAxiosBody('current_user');
-      const instance = axios.create({withCredentials: true});
-      instance.post('http://127.0.0.1:8000/api/v1/user', body)
-          .then(() => {
-              setIsAuth(true);
-          })
-          .catch(() => {
-              setIsAuth(false);
-          })
+          const instance = axios.create({withCredentials: true});
+          instance.post('http://127.0.0.1:8000/api/v1/user', body)
+              .then((response) => {
+                  setIsAuth(true);
+                  localStorage.setItem('user', response.data['result'].email);
+              })
+              .catch(() => {
+                  setIsAuth(false);
+              })
+
   });
 
   return (
@@ -31,7 +37,7 @@ const SearchBar = () => {
       </form>
         {isAuth
       ? <button className={styles.user_profile_icon} type="button" onClick={() => navigate('/profile')}><UserAvatar/></button>
-      : <div>
+      : <div className={styles.container_btn}>
           <button className={styles.btn} onClick={() => navigate('/login')} type="button">Log In</button>
           <button className={styles.btn} onClick={() => navigate('/register')} type="button">Sign Up</button>
       </div>}

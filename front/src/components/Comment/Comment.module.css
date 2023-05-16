@@ -14,3 +14,23 @@
 .text {
     margin: 0;
 }
+
+.claim {
+    cursor: pointer;
+}
+
+.del_comment {
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.inner_container {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}

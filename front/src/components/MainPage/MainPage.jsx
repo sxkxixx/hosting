@@ -26,7 +26,7 @@ export const MainPage = () => {
         })
   }, [setVideos]);
 
-  const videosList = videos.map((video) => <Link to={`/watch/${video.id}`}><VideoCard id={video.id} title={video.title} preview={video.preview}/></Link>);
+  const videosList = videos.map((video) => <Link to={`/watch/${video.id}`} style={{ textDecoration: 'none', color: 'gray' }}><VideoCard id={video.id} title={video.title} preview={video.preview} owner={video.owner.email}/></Link>);
 
   return (
   <div>

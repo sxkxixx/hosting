@@ -115,7 +115,7 @@ def current_user(user: User = Depends(get_current_user)) -> dict:
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     logging.info(f'Current User: {user.email}')
-    return {'username': user.username}
+    return {'email': user.email}
 
 
 @user_route.method(tags=['user'])
