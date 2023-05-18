@@ -9,3 +9,4 @@ docker-compose.yml
 **/__pycache__
 app/logs.log
 app/static
+front/node_modules
