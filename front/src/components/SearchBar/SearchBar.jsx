@@ -25,6 +25,7 @@ const SearchBar = () => {
               })
               .catch(() => {
                   setIsAuth(false);
+                  localStorage.removeItem('user');
               })
 
   });

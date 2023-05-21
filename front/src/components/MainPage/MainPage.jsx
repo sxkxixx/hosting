@@ -17,9 +17,9 @@ export const MainPage = () => {
 
     instance.post('http://127.0.0.1:8000/api/v1/video', body)
         .then(response => {
-          setVideos(response.data['result'].videos);
-          document.title = 'Video Hosting'
-          // setUser(response.data['result'].user);
+            const video = response.data['result'].videos;
+            setVideos(video);
+            document.title = 'Video Hosting'
         })
         .catch((err) => {
             console.log(err);

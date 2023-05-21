@@ -13,9 +13,8 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])
-async def main_page(user: User = Depends(get_current_user)) -> dict | None:
+async def main_page(user: User = Depends(get_current_user)) -> dict :
     try:
-        # videos = await Video.objects.select_related('user_views').order_by('-user_views__count').all()
         videos = await Video.objects.all()
         logging.info(f'Main Page')
         return {

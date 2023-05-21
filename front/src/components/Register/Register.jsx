@@ -2,9 +2,11 @@ import styles from './Register.module.css';
 import React, {useState} from 'react';
 import getAxiosBody from "../sendData";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const Register = () => {
     document.title = 'Sign Up';
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -72,10 +74,10 @@ const Register = () => {
             )
         axios.post('http://127.0.0.1:8000/api/v1/user', data)
             .then((response) => {
-              console.log(response.data)
+              navigate('/');
             })
             .catch((error) => {
-              console.log(error)
+              event.target.reset();
             })
     };
 

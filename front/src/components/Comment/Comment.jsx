@@ -1,7 +1,6 @@
 import styles from './Comment.module.css';
 import getAxiosBody from "../sendData";
 import axios from "axios";
-import {findDOMNode, unmountComponentAtNode} from "react-dom";
 
 const Comment = ({id, owner, text}) => {
     const user = localStorage.getItem('user');
@@ -13,15 +12,12 @@ const Comment = ({id, owner, text}) => {
             .then((response) => {
                 if (response.data['result'].status !== 'deleted')
                     throw new Error();
-                unmountComponentAtNode(findDOMNode(id));
+                window.location.reload();
             })
             .catch((err) => {
                 console.log(err);
             })
     };
-
-
-
 
     return (
         <div key={`comment${id}`} className={styles.comment}>

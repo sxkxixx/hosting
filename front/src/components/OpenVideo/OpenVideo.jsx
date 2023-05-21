@@ -15,7 +15,6 @@ const OpenVideo = () => {
   const [likes, setLikes] = useState(0);
   const [video, setVideo] = useState([]);
   const [comments, setComments] = useState([]);
-
   const [commentText, setCommentText] = useState('');
 
   const {id} = useParams();
@@ -55,6 +54,7 @@ const OpenVideo = () => {
   };
 
   const handleCommentTextChange = event => setCommentText(event.target.value);
+  const clearFields = event => event.target.reset();
 
   const sendComment = (event) => {
       event.preventDefault();
@@ -69,7 +69,9 @@ const OpenVideo = () => {
               setCommentText('');
           })
           .catch()
-          .finally(() => event.target.reset());
+          .finally(() => {
+              clearFields(event);
+          });
   };
 
   const commentList = comments.slice().map(comment =>
@@ -100,9 +102,9 @@ const OpenVideo = () => {
             <div className={styles.comments_container}>
               {commentList}
             </div>
-            <form className={styles.comment_form} action="" method="post">
+            <form className={styles.comment_form} onSubmit={sendComment} action="" method="post">
               <input className={styles.comment_input} onChange={handleCommentTextChange} placeholder="Напишите комментарий"/>
-              <button className={styles.comment_send_btn} onClick={sendComment} type='submit'><Arrow/></button>
+              <button className={styles.comment_send_btn} type='submit'><Arrow/></button>
             </form>
           </div>
       </div>
