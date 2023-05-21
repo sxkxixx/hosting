@@ -13,19 +13,24 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])
-async def main_page(user: User = Depends(get_current_user)) -> dict:
-    videos = await Video.objects.select_related('user_views').order_by('-user_views__count').all()
-    return {
-        'user': user.email if user else None,
-        'videos': [{
-            'id': video.id,
-            'title': video.title,
-            'owner': {
-                'id': video.owner.id,
-                'email': video.owner.email
-            }
-        } for video in videos]
-    }
+async def main_page(user: User = Depends(get_current_user)) -> dict :
+    try:
+        videos = await Video.objects.all()
+        logging.info(f'Main Page')
+        return {
+            'user': user.email if user else None,
+            'videos': [{
+                'id': video.id,
+                'title': video.title,
+                'preview': await video.preview_url(),
+                'owner': {
+                    'id': video.owner.id,
+                    'email': (await User.objects.get(User.id == video.owner.id)).email
+                }
+            } for video in videos]
+        }
+    except Exception as e:
+        logging.error(f'{e}')
 
 
 @video_router.post('/upload_video', tags=['video'])
@@ -74,10 +79,8 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
         owner=user,
         video=video
     ).save()
-    # await video.video_comments.add(comment)
     logging.info(f'Upload Comment: Comment {comment.id} uploaded')
-    logging.info(comment)
-    return {'comment': comment.id, 'status': 'uploaded'}
+    return {'comment': comment.id, 'status': 'uploaded', 'user': user.email}
 
 
 @video_router.method(tags=['video'])
@@ -117,7 +120,7 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
     except:
         like_record = Like(user=user.id, video=video_id)
         await like_record.save()
-        logging.info(f'Change Like Status: {like_record.id} deleted')
+        logging.info(f'Change Like Status: {like_record.id} added')
         return {'status': 'Added'}
 
 
@@ -141,16 +144,17 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         logging.info(f'Get Video: Video({id}) data returned')
         comments = await video.video_comments.all()
         return {'video': {
+            'owner': (await User.objects.get(User.id == video.owner.id)).email,
+            'preview': await video.preview_url(),
             'url': await video.video_url(),
             'title': video.title,
             'description': video.description,
             'likes': await video.likes_amount,
         },
-                'comments': [{'id': comment.id,
-                              'owner': (await User.objects.get(User.id == comment.owner.id)).email,
-                              'text': comment.comment_text,
-                              'created_at': comment.created_at} for comment in comments],
-                'is_liked': is_liked}
+            'comments': [{'id': comment.id,
+                          'owner': (await User.objects.get(User.id == comment.owner.id)).email,
+                          'text': comment.comment_text} for comment in comments],
+            'is_liked': is_liked}
     except Exception as e:
         logging.error(f'Get Video: {e}')
 

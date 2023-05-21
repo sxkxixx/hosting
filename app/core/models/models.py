@@ -35,6 +35,10 @@ class User(ormar.Model):
     hashed_password: str = ormar.String(nullable=False, max_length=200)
     role: Role = ormar.ForeignKey(Role)
     is_superuser: bool = ormar.Boolean(default=False, nullable=False)
+    avatar: str = ormar.String(max_length=50, nullable=True, unique=True)
+
+    async def avatar_url(self):
+        return await get_url(self.avatar) if self.avatar else None
 
 
 class Video(ormar.Model):

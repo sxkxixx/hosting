@@ -1,0 +1,122 @@
+.main_container_profile {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.container_left {
+    display: flex;
+    flex-direction: column;
+    width: 70%;
+    height: 90%;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.container_right {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.user_info {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 8px;
+    gap: 8px;
+    align-items: center;
+}
+
+.user_avatar {
+    align-self: center;
+    display: block;
+    width: 80px;
+    height: 80px;
+    padding: 0;
+    margin-right: 4px;
+    background-position: center;
+    background-repeat: no-repeat;
+    border: 1px solid #D9D9D9;
+    border-radius: 50%;
+    background-color: #D9D9D9;
+    cursor: auto;
+}
+
+p, h3 {
+    padding: 0;
+    margin: 0; 
+}
+
+.user_info_profile .user_name {
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+}
+
+.videos_container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 26px;
+    list-style: none;
+    margin: 0;
+    padding: 12px 12px;
+    min-height: 213px;
+}
+
+.video {
+    width: 300px;
+    height: 180px;
+    background-color: #D9D9D9;
+    margin: 0;
+    padding: 0;
+    border-radius: 8px;
+}
+
+.button_container {
+    display: flex;
+    flex-direction: row;
+    gap:8px;
+    justify-content: end;
+    margin-bottom: 50px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border-style: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.back_to_search, .video_upload__input {
+    background-color: #2B5279;
+    color: white;
+    border: 2px solid #2B5279;
+}
+
+.back_to_search:hover {
+    border: 2px solid #2B5279;
+    color:#2B5279;
+    background-color: #fff;
+}
+
+.log_out_in {
+    border: 2px solid #2B5279;
+    color:#2B5279;
+    background-color: #fff;
+}
+
+.log_out_in:hover {
+    background-color: #2B5279;
+    color: white;
+    border: 2px solid #2B5279;
+}
+
+
+
+

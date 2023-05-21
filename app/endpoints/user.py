@@ -1,11 +1,15 @@
 import datetime
-from fastapi import Depends, Response, HTTPException, Body
+from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
 from app.utils.hasher import Hasher, get_current_user
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
 from app.core.models.models import User, Video, Role, Claim
 from app.core.schemas.schemas import UserRegister, UserSchema, ClaimSchema
 import fastapi_jsonrpc as jsonrpc
+from app.utils.s3_client import upload_file
+from app.utils.hasher import get_unique_name
+from app.core.config import AVATARS_DIR
 import logging
+
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
 
@@ -78,14 +82,16 @@ async def profile(user: User = Depends(get_current_user)) -> dict:
         logging.warning(f'Profile: No user')
         raise HTTPException(status_code=401, detail='Unauthorized')
     try:
-        videos = await Video.objects.filter(User.id == Video.owner_id).fields(['id', 'title']).all()
-    except:
+        videos = await Video.objects.filter(user.id == Video.owner.id).all()
+    except Exception as e:
+        logging.error(f'{e}')
         videos = []
     logging.info(f'Profile: {user.email}: {list(videos)}')
     context = {
+        'avatar': await user.avatar_url(),
         'username': user.username,
         'email': user.email,
-        'videos': [{'id': video.id, 'title': video.title} for video in videos]
+        'videos': [{'id': video.id, 'title': video.title, 'preview': await video.preview_url()} for video in videos]
     }
     return context
 
@@ -114,7 +120,7 @@ def current_user(user: User = Depends(get_current_user)) -> dict:
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     logging.info(f'Current User: {user.email}')
-    return {'username': user.username}
+    return {'email': user.email}
 
 
 @user_route.method(tags=['user'])
@@ -123,3 +129,16 @@ async def delete_user(email: str = Body(...)) -> str:
     await user.delete()
     logging.info(f'Delete User: {user.email} deleted')
     return 'deleted'
+
+
+@user_route.post(tags=['user'], path='/upload_avatar')
+async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail='Unauthorized')
+    unique_avatar_name = AVATARS_DIR + get_unique_name(avatar.filename)
+    result = await upload_file(avatar, unique_avatar_name)
+    if not result:
+        raise HTTPException(status_code=400, detail='Bad Request')
+    await user.update(avatar=unique_avatar_name)
+    return {'avatar': await user.avatar_url()}
+

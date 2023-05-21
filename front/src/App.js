@@ -1,18 +1,22 @@
 import './App.css'
 import { MainPage } from './components/MainPage/MainPage';
-import { OpenVideo } from './components/OpenVideo/OpenVideo';
-import { AuthorizedProfilePage } from './components/ProfilePage/AuthorizedProfilePage';
-import { UnauthorizedProfilePage } from './components/ProfilePage/UnauthorizedProfilePage';
+import OpenVideo from './components/OpenVideo/OpenVideo';
+import Profile from './components/Profile/Profile';
 import {Route, Routes} from 'react-router-dom'
+import Register from "./components/Register/Register";
+import Login from "./components/Login/Login";
+import ClaimPopup from "./components/ClaimPopup/ClaimPopup";
 
-function App() {
+const App = () => {
   return (
     <div className="App">
       <Routes>
         <Route path="/" element={<MainPage/>}></Route>
-        <Route path="authProfilePage" element={<AuthorizedProfilePage/>}></Route>
-        <Route path="unauthProfilePage" element={<UnauthorizedProfilePage/>}></Route>
-        <Route path="openVideo" element={<OpenVideo/>}></Route>
+        <Route path="/profile" element={<Profile/>}></Route>
+        <Route path="/watch/:id" element={<OpenVideo/>}></Route>
+          <Route path="/register" element={<Register/>}></Route>
+          <Route path="/login" element={<Login/>}></Route>
+          <Route path="/popup" element={<ClaimPopup/>}></Route>
       </Routes>
     </div>
   );
