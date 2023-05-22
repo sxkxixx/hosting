@@ -3,24 +3,25 @@ import datetime
 import fastapi_jsonrpc as jsonrpc
 from fastapi import Depends, HTTPException, Response, Body
 from app.core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.core.schemas.schemas import UserSchema
+from app.core.schemas import UserSchema
 from app.utils.hasher import get_current_user, Hasher, get_object_by_id
-from app.core.models.models import User, Claim
+from app.core.models import User, Claim
+from app.core.exceptions import AuthError, UserNotExistsError, NoAdminError, WrongDataError
 
 admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
-@admin_route.method(tags=['admin'])
+@admin_route.method(tags=['admin'], errors=[UserNotExistsError, NoAdminError, WrongDataError])
 async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
     try:
         admin: User = await User.objects.get(User.email == admin_schema.email)
         logging.info(f'Admin Login: Admin({admin_schema.email}) loging in')
     except:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise UserNotExistsError()
     if not admin.is_superuser:
         logging.warning(f'Admin Login: User({admin.email}) is not Admin')
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoAdminError()
     if Hasher.verify_password(admin_schema.password, admin.hashed_password):
         data = {'sub': admin.email}
         access_token = Hasher.get_encode_token(data)
@@ -31,13 +32,13 @@ async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
         logging.info(f'Admin Login: Successfully login {admin.email}')
         return {'user': admin.email, 'status': 'Authorized'}
     logging.error(f'Admin Login: Incorrect password for Admin({admin.email})')
-    raise HTTPException(status_code=400, detail='Bad Request')
+    raise WrongDataError()
 
 
-@admin_route.method(tags=['admin'])
+@admin_route.method(tags=['admin'], errors=[NoAdminError])
 async def admin_claims(admin: User = Depends(get_current_user)) -> list[dict]:
     if not admin.is_superuser:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoAdminError()
     try:
         claims = await Claim.objects.filter(status='sent').all()
         return [{'claim_id': claim.id, 'description': claim.description,
@@ -48,11 +49,11 @@ async def admin_claims(admin: User = Depends(get_current_user)) -> list[dict]:
     # return claims
 
 
-@admin_route.method(tags=['admin'])
+@admin_route.method(tags=['admin'], errors=[NoAdminError])
 async def change_claim_status(claim_id: int = Body(...), status: str = Body(...),
                               admin: User = Depends(get_current_user)) -> dict:
     if not admin.is_superuser:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoAdminError()
     try:
         claim = await Claim.objects.get(Claim.id == claim_id)
     except:
@@ -64,10 +65,10 @@ async def change_claim_status(claim_id: int = Body(...), status: str = Body(...)
     return {'claim': claim.id, 'status': claim.status}
 
 
-@admin_route.method(tags=['admin'])
+@admin_route.method(tags=['admin'], errors=[NoAdminError])
 async def get_claim_object(claim_id: int = Body(...), admin: User = Depends(get_current_user)) -> dict:
     if not admin.is_superuser:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoAdminError()
     try:
         claim = await Claim.objects.get(Claim.id == claim_id)
     except:
@@ -76,10 +77,10 @@ async def get_claim_object(claim_id: int = Body(...), admin: User = Depends(get_
     return claim_object
 
 
-@admin_route.method(tags=['admin'])
+@admin_route.method(tags=['admin'], errors=[NoAdminError])
 async def delete_claim(claim_id: int = Body(...), admin: User = Depends(get_current_user)) -> dict:
     if not admin.is_superuser:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoAdminError()
     try:
         claim = await Claim.objects.get(Claim.id == claim_id)
     except:

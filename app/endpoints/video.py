@@ -1,14 +1,14 @@
 from typing import Optional
 import fastapi_jsonrpc as jsonrpc
-from fastapi import HTTPException, Request, Response, Depends, Body, Form, UploadFile, File
-from app.core.models.models import User, Video, Comment, Like, View
+from fastapi import HTTPException, Depends, Body, Form, UploadFile, File
+from app.core.models import User, Video, Comment, Like, View
+from app.core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataError
 from app.utils.hasher import get_current_user, get_unique_name
 from app.utils.s3_client import upload_file
-from app.core.schemas.schemas import CommentUploadSchema
+from app.core.schemas import CommentUploadSchema
 import logging
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
-
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
@@ -34,11 +34,10 @@ async def main_page(user: User = Depends(get_current_user)) -> dict :
 
 
 @video_router.post('/upload_video', tags=['video'])
-async def upload_video(request: Request, response: Response, title: str = Form(...),
+async def upload_video(user: User = Depends(get_current_user), title: str = Form(...),
                        description: str = Form(...),
                        video_file: UploadFile = File(...),
                        preview_file: Optional[UploadFile | None] = File(...)):
-    user = await get_current_user(request, response)
     if not user:
         logging.warning(f'Upload Video: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
@@ -64,16 +63,16 @@ async def upload_video(request: Request, response: Response, title: str = Form(.
         HTTPException(status_code=400, detail='e')
 
 
-@video_router.method(tags=['video'])
+@video_router.method(tags=['video'], errors=[AuthError, NoVideoError])
 async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Upload Comment: No User')
-        raise HTTPException(status_code=401, detail='Unauthorized')
+        raise AuthError()
     try:
         video = await Video.objects.get(comment_data.video_id == Video.id)
-    except Exception as e:
-        logging.warning(f'Upload Comment: No Video: {e}')
-        raise HTTPException(status_code=400, detail='Bad Request')
+    except:
+        logging.warning(f'Upload Comment: No Video: {comment_data.video_id}')
+        raise NoVideoError()
     comment = await Comment(
         comment_text=comment_data.comment_text,
         owner=user,
@@ -83,35 +82,35 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
     return {'comment': comment.id, 'status': 'uploaded', 'user': user.email}
 
 
-@video_router.method(tags=['video'])
+@video_router.method(tags=['video'], errors=[AuthError, NoCommentError, WrongDataError])
 async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Delete Comment: No User')
-        raise HTTPException(status_code=401, detail='Unauthorized')
+        raise AuthError()
     try:
         comment = await Comment.objects.get(Comment.id == comment_id)
     except:
         logging.warning(f'Delete Comment: No comment {comment_id}')
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoCommentError()
     if comment.owner == user:
         context = {'comment': comment.id, 'status': 'deleted'}
         await comment.delete()
         logging.info(f'Delete Comment: Comment Deleted {comment_id}')
         return context
     logging.error(f'Delete Comment: User-{user.id} can\'t delete Comment-{comment.id}')
-    raise HTTPException(status_code=400, detail='Bad Request')
+    raise WrongDataError()
 
 
-@video_router.method(tags=['video'])
+@video_router.method(tags=['video'], errors=[AuthError, NoVideoError])
 async def change_like_status(video_id: int, user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Change Like Status: No User')
-        raise HTTPException(status_code=401, detail='Unauthorized')
+        raise AuthError()
     try:
         video = await Video.objects.get(Video.id == video_id)
     except:
         logging.warning(f'Change Like Status: No Video')
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoVideoError()
     try:
         like_record = await Like.objects.get(video.id == Like.video.id and user.id == Like.user.id)
         logging.info(f'Change Like Status: {like_record.id} deleted')
@@ -124,13 +123,13 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
         return {'status': 'Added'}
 
 
-@video_router.method(tags=['video'])
+@video_router.method(tags=['video'], errors=[NoVideoError])
 async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
     try:
         video = await Video.objects.get(id == Video.id)
     except:
         logging.warning(f'Get Video: No Video {id}')
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoVideoError()
     is_liked = False
     if user:
         await View.objects.create(video=id, user=user.id)
@@ -159,27 +158,20 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
         logging.error(f'Get Video: {e}')
 
 
-@video_router.method(tags=['video'])
+@video_router.method(tags=['video'], errors=[AuthError, NoVideoError, WrongDataError])
 async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning(f'Delete Video: No User')
-        raise HTTPException(status_code=401, detail='Unauthorized')
+        raise AuthError()
     try:
         video = await Video.objects.get(Video.id == video_id)
     except:
         logging.warning(f'Delete Video: User {user.id}, No Video {video_id}')
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise NoVideoError()
     if user == video.owner:
         context = {'video': video.id, 'status': 'deleted'}
         video.delete_from_s3()
         await video.delete()
         return context
     logging.error(f'Delete Video: User-{user.email} can\'t delete video-{video.id}')
-    raise HTTPException(status_code=400, detail='Bad Request')
-
-
-@video_router.method(tags=['video'])
-async def delete_like_record(like_id: int = Body(...)) -> str:
-    like = await Like.objects.get(Like.id == like_id)
-    await like.delete()
-    return 'deleted'
+    raise WrongDataError()

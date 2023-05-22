@@ -1,11 +1,10 @@
 import sqlalchemy
-from app.core.models.models import database, DATABASE_URL
+from app.core.models import database, DATABASE_URL, metadata
 from app.endpoints.user import user_route
 from app.endpoints.video import video_router
 from app.endpoints.admin import admin_route
 from fastapi.middleware.cors import CORSMiddleware
 import fastapi_jsonrpc as jsonrpc
-from app.core.models.models import metadata
 
 
 app = jsonrpc.API(

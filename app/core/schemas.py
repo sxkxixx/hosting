@@ -40,8 +40,20 @@ class CommentUploadSchema(BaseModel):
     video_id: int
     comment_text: str
 
+    @validator('video_id', 'comment_text')
+    def validate(cls, v, values, **kwargs):
+        if not v:
+            raise ValueError(f'Enter {kwargs["field"].name.capitalize()}')
+        return v
+
 
 class ClaimSchema(BaseModel):
     description: str
     claim_type: str
     claim_object_id: int
+
+    @validator('description', 'claim_type', 'claim_object_id')
+    def validate(cls, v, values, **kwargs):
+        if not v:
+            raise ValueError(f'Enter {kwargs["field"].name.capitalize()}')
+        return v
