@@ -8,6 +8,7 @@ const UploadVideo = () => {
     const [description, setDescription] = useState('');
     const [preview, setPreview] = useState(null);
     const [video, setVideo] = useState(null);
+    const [buttonText, setButtonText] = useState('Загрузить');
 
     const handleTitleChange = event => setTitle(event.target.value);
     const handleDescriptionChange = event => setDescription(event.target.value);
@@ -29,6 +30,7 @@ const UploadVideo = () => {
         if (!(title && description && preview && video)) {
             return;
         }
+        setButtonText('Видео загружается...');
         const formData = new FormData();
         formData.append('title', title);
         formData.append('description', description);
@@ -37,9 +39,17 @@ const UploadVideo = () => {
 
         const instance = axios.create({withCredentials: true});
         instance.post('http://127.0.0.1:8000/upload_video', formData)
-            .then(response => console.log(response.data))
-            .catch(err => console.log(err))
-            .finally(() => clearFields(event));
+            .then(response => {
+                setButtonText('Видео загружено');
+                console.log(response.data)
+            })
+            .catch(err => {
+                setButtonText('Произошла ошибка во время загрузки')
+            })
+            .finally(() => {
+                clearFields(event)
+                setTimeout(() => setButtonText('Загрузите видео'), 2000);
+            });
 
     }
 
@@ -57,7 +67,7 @@ const UploadVideo = () => {
                 <span>{video ? 'Видео прикреплено' : 'Прикрепите видео'}</span>
             </label>
         </div>
-        <button className={styles.btn} type="submit">Загрузить</button>
+        <button className={styles.btn} type="submit">{buttonText}</button>
     </form>;
 };
 

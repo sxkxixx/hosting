@@ -1,18 +1,37 @@
 .card {
-    border: 1px solid black;
+    border: 1px solid #b5b5b5;
     border-radius: 10px;
-    padding: 25px;
+    padding: 20px;
 }
 
 .preview {
-    width: 300px;
+    width: 320px;
     height: 170px;
 }
 
 .title {
-
+    color: black;
+    font-size: 16px;
 }
 
 .owner {
+    font-size: 16px;
+    color: black;
+}
 
+.container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.avatar {
+    border-radius: 50%;
+    border: 1px solid;
+}
+
+.brash {
+    cursor: pointer;
+    align-self: self-end;
+    z-index: 99;
 }

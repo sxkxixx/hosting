@@ -39,7 +39,7 @@ const Profile =  () => {
         const body = getAxiosBody('logout');
         const instance = axios.create({withCredentials: true});
         await instance.post('http://127.0.0.1:8000/api/v1/user', body);
-        localStorage.removeItem('user');
+        localStorage.clear();
     };
 
     const chooseAvatar = () => {
@@ -63,7 +63,7 @@ const Profile =  () => {
 
 
     const videoList = videos.map((video) =>
-        <Link to={`/watch/${video.id}`}><VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email}/></Link>
+        <VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email} isProfile={true}/>
     )
 
     return (

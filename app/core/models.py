@@ -33,7 +33,7 @@ class User(ormar.Model):
     username: str = ormar.String(unique=True, max_length=25, nullable=False)
     email: str = ormar.String(unique=True, max_length=100, nullable=False)
     hashed_password: str = ormar.String(nullable=False, max_length=200)
-    role: Role = ormar.ForeignKey(Role)
+    role: Role = ormar.ForeignKey(Role, ondelete='NO ACTION')
     is_superuser: bool = ormar.Boolean(default=False, nullable=False)
     avatar: str = ormar.String(max_length=50, nullable=True, unique=True)
 
@@ -48,7 +48,7 @@ class Video(ormar.Model):
     id: int = ormar.Integer(primary_key=True)
     title: str = ormar.String(nullable=False, max_length=150)
     description: str = ormar.String(nullable=True, max_length=300)
-    owner: User = ormar.ForeignKey(User, related_name='videos')
+    owner: User = ormar.ForeignKey(User, related_name='videos', ondelete='CASCADE')
     video_cloud_name: str = ormar.String(max_length=100, nullable=False, unique=True)
     preview_cloud_name: str = ormar.String(max_length=100, nullable=True, unique=True)
 
@@ -81,8 +81,8 @@ class Like(ormar.Model):
         tablename = 'likes'
 
     id: int = ormar.Integer(primary_key=True)
-    user: User = ormar.ForeignKey(User)
-    video: Video = ormar.ForeignKey(Video, related_name='video_likes')
+    user: User = ormar.ForeignKey(User, ondelete='CASCADE')
+    video: Video = ormar.ForeignKey(Video, ondelete='CASCADE')
 
 
 class Comment(ormar.Model):
@@ -91,8 +91,8 @@ class Comment(ormar.Model):
 
     id: int = ormar.Integer(primary_key=True)
     comment_text: str = ormar.String(max_length=200, nullable=False)
-    owner: User = ormar.ForeignKey(User, related_name='user_comments')
-    video: Video = ormar.ForeignKey(Video, related_name='video_comments')
+    owner: User = ormar.ForeignKey(User, related_name='user_comments', ondelete='CASCADE')
+    video: Video = ormar.ForeignKey(Video, related_name='video_comments', ondelete='CASCADE')
     created_at: datetime = ormar.DateTime(default=datetime.utcnow)
 
 
@@ -101,8 +101,9 @@ class View(ormar.Model):
         tablename = 'views'
 
     id: int = ormar.Integer(primary_key=True)
-    user: User = ormar.ForeignKey(User, related_name='viewed_videos', nullable=True)
-    video: Video = ormar.ForeignKey(Video, related_name='user_views')
+    user: User = ormar.ForeignKey(User, related_name='viewed_videos', nullable=True, ondelete="SET NULL")
+    # TODO video: Переделать на ondelete="CASCADE"
+    video: Video = ormar.ForeignKey(Video, related_name='user_views', nullable=True, ondelete="SET NULL")
 
 
 class Claim(ormar.Model):
@@ -115,6 +116,6 @@ class Claim(ormar.Model):
     id: int = ormar.Integer(primary_key=True)
     description: str = ormar.String(max_length=200, nullable=False)
     claim_type: str = ormar.String(max_length=15, choices=CLAIMS_OBJECTS)
-    owner: User = ormar.ForeignKey(User, related_name='user_claims')
+    owner: User = ormar.ForeignKey(User, related_name='user_claims', ondelete='CASCADE')
     claim_object_id: int = ormar.Integer()
     status: str = ormar.String(max_length=15, choices=CLAIM_STATUSES, default='sent')

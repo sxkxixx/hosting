@@ -33,7 +33,7 @@ const OpenVideo = () => {
           setVideo(response.data['result'].video)
           setIsLiked(response.data['result'].is_liked)
           setLikes(response.data['result'].video['likes']);
-          document.title = video['title'];
+          document.title = video.title;
         })
         .catch(err => {
           console.log(err);
@@ -112,6 +112,10 @@ const OpenVideo = () => {
         </div>)
   );
 
+  const deleteVideo = () => {
+
+  };
+
   return (
       <div>
           <div>
@@ -129,6 +133,11 @@ const OpenVideo = () => {
                   setClaimType('video');
                   setModalActive(true);
               }} style={{marginRight: 20}} src={require('../../img/claim.png')} width={20} height={20} alt={"Пожаловаться на видео"}/>
+              {localStorage.getItem('user') === video.owner ?
+                  <img className={styles.trashcan}
+                       onClick={deleteVideo}
+                       src={require('../../img/delete.png')} width={20} height={20}/>
+                  : null}
             <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
           </div>
           <div className={styles.description_box} name='description-box'>

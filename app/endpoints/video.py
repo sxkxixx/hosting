@@ -170,7 +170,7 @@ async def delete_video(video_id: int = Body(...), user: User = Depends(get_curre
         raise NoVideoError()
     if user == video.owner:
         context = {'video': video.id, 'status': 'deleted'}
-        video.delete_from_s3()
+        await video.delete_from_s3()
         await video.delete()
         return context
     logging.error(f'Delete Video: User-{user.email} can\'t delete video-{video.id}')

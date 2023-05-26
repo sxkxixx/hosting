@@ -6,6 +6,7 @@
     padding: 0;
     width: 100%;
     margin: 0 auto 40px;
+    align-items: center;
 }
 
 form {
@@ -71,3 +72,9 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
     gap: 15px;
     align-self: center;
 }
+
+.pointer {
+    cursor: pointer;
+}
+
+

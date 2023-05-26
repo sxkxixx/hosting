@@ -1,6 +1,7 @@
 import styles from './SearchBar.module.css';
 import {ReactComponent as Arrow} from '../../img/arrow.svg';
 import {ReactComponent as UserAvatar} from '../../img/user-avatar.svg';
+import {ReactComponent as Logo} from "../../img/play.svg";
 import { useNavigate } from 'react-router-dom';
 import {useEffect, useState} from "react";
 import axios from "axios";
@@ -32,6 +33,7 @@ const SearchBar = () => {
 
   return (
     <div className={styles.container}>
+        <div onClick={() => navigate('/')} className={styles.pointer}><Logo/></div>
       <form action="" method="post">
         <input className={styles.search_input} type="search" name="search" placeholder="Поиск"/>
         <button className={styles.search_btn} type="submit"><Arrow/></button>
