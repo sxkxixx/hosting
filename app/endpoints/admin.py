@@ -5,7 +5,7 @@ from fastapi import Depends, HTTPException, Response, Body
 from app.core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.core.schemas import UserSchema
 from app.utils.hasher import get_current_user, Hasher, get_object_by_id
-from app.core.models import User, Claim
+from app.core.models import User, Claim, Comment
 from app.core.exceptions import AuthError, UserNotExistsError, NoAdminError, WrongDataError
 
 admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
@@ -36,17 +36,23 @@ async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
 
 
 @admin_route.method(tags=['admin'], errors=[NoAdminError])
-async def admin_claims(admin: User = Depends(get_current_user)) -> list[dict]:
+async def admin_claims(admin: User = Depends(get_current_user)) -> dict:
     if not admin.is_superuser:
         raise NoAdminError()
     try:
-        claims = await Claim.objects.filter(status='sent').all()
-        return [{'claim_id': claim.id, 'description': claim.description,
-                 'claim_type': claim.claim_type, 'owner': claim.owner.id,
-                 'claim_object_id': claim.claim_object_id, 'status': claim.status} for claim in claims]
+        comment_claims = [
+            {'id': claim.id, 'comment': (await Comment.objects.get(Comment.id == claim.claim_object_id)).comment_text,
+             'claim': claim.description}
+            for claim in await Claim.objects.filter((Claim.status == 'sent') & (Claim.claim_type == 'comment')).all()
+        ]
+        video_claims = [
+            {'id': claim.id, 'video_id': claim.claim_object_id, 'claim': claim.description} for claim in
+            await Claim.objects.filter((Claim.status == 'sent') & (Claim.claim_type == 'video')).all()
+        ]
+
+        return {'comment_claims': comment_claims, 'video_claims': video_claims}
     except Exception as e:
         print(e)
-    # return claims
 
 
 @admin_route.method(tags=['admin'], errors=[NoAdminError])
@@ -60,8 +66,7 @@ async def change_claim_status(claim_id: int = Body(...), status: str = Body(...)
         raise HTTPException(status_code=400, detail='Bad Request')
     if status not in {'approved', 'denied'}:
         raise HTTPException(status_code=400, detail='Bad Request')
-    claim.status = status
-    await claim.save()
+    await claim.update(status=status)
     return {'claim': claim.id, 'status': claim.status}
 
 

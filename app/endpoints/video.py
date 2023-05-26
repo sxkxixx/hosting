@@ -148,7 +148,7 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
             'url': await video.video_url(),
             'title': video.title,
             'description': video.description,
-            'likes': await video.likes_amount,
+            'likes': await video.likes_amount(),
         },
             'comments': [{'id': comment.id,
                           'owner': (await User.objects.get(User.id == comment.owner.id)).email,

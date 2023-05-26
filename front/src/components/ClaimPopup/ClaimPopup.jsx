@@ -5,8 +5,7 @@ import axios from "axios";
 import {useState} from "react";
 
 
-const ClaimPopup = ({id, type}) => {
-    const [isOpened, setIsOpened] = useState(true);
+const ClaimPopup = ({active, setActive, id, type}) => {
     const [claimText, setClaimText] = useState('');
     const [exception, setException] = useState('');
     const [msg, setMsg] = useState('');
@@ -20,7 +19,7 @@ const ClaimPopup = ({id, type}) => {
             return;
         }
         const instance = axios.create({withCredentials: true});
-        const body = getAxiosBody('create_claim', {"claim": {
+        const body = getAxiosBody('create_claim', {"claim_schema": {
             "description": claimText, "claim_type": type, "claim_object_id": id}});
         instance.post('http://127.0.0.1:8000/api/v1/user', body)
             .then((response) => {
@@ -28,24 +27,27 @@ const ClaimPopup = ({id, type}) => {
                 if ('error' in data) {
                     throw new Error();
                 }
+                setException('');
                 setMsg('Жалоба отправлена');
             })
             .catch((err) => {
-
                 setException('Жалоба не отправлена')
+                setMsg('');
             })
 
     }
 
     const closePopup = () => {
-        setIsOpened(false);
+        setActive(false);
         setClaimText('');
+        setMsg('');
+        setException('');
     }
 
     return (
-        isOpened ?
-        (<div className={styles.container}>
-            <div className={styles.popup}>
+        active ?
+        (<div className={styles.container} onClick={() => setActive(false)}>
+            <div className={styles.popup} onClick={e => e.stopPropagation()}>
                 <div className={styles.nav}>
                     <h1 className={styles.title}>Отправить жалобу</h1>
                     <p className={styles.cross} onClick={closePopup}><Cross/></p>

@@ -63,10 +63,10 @@ class Video(ormar.Model):
             url = None
         return url
 
-    @property
     async def likes_amount(self):
         try:
-            return await Like.objects.filter(Like.video.id == self.id).count()
+            likes_records = await Like.objects.filter(Like.video.id == self.id).all()
+            return len(likes_records)
         except Exception as e:
             logging.info(f'Likes Amount: {e}')
             return 0

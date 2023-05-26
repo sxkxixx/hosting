@@ -100,10 +100,12 @@ async def profile(user: User = Depends(get_current_user)) -> dict:
 
 
 @user_route.method(tags=['user'], errors=[AuthError, WrongDataError])
-async def create_claim(claim_schema: ClaimSchema, user: User = Depends(get_current_user)) -> dict:
+async def create_claim(claim_schema: ClaimSchema = Body(...), user: User = Depends(get_current_user)) -> dict:
     if not user:
         logging.warning('Send Claim: No User')
         raise AuthError()
+    if not (claim_schema.claim_type and claim_schema.claim_object_id and claim_schema.description):
+        raise WrongDataError()
     try:
         claim = Claim(
             description=claim_schema.description,
@@ -112,6 +114,7 @@ async def create_claim(claim_schema: ClaimSchema, user: User = Depends(get_curre
             claim_object_id=claim_schema.claim_object_id
         )
         await claim.save()
+        logging.info(f'Create Claim: {claim.id}')
         return {'claim': {'id': claim.id, 'description': claim.description}, 'status': 'created'}
     except Exception as e:
         logging.error(f'Create Claim: {e}')

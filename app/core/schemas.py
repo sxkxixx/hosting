@@ -24,10 +24,6 @@ class UserRegister(UserSchema):
             raise ValueError(f'{kwargs["field"].name.capitalize()} must be longer then 12 symbols')
         return v
 
-    @validator('password', 'password_repeat')
-    def password_symbols_validator(cls, v, values, **kwargs):
-        return v
-
 
 class VideoUploadSchema(BaseModel):
     title: str = Form(...)
@@ -40,20 +36,8 @@ class CommentUploadSchema(BaseModel):
     video_id: int
     comment_text: str
 
-    @validator('video_id', 'comment_text')
-    def validate(cls, v, values, **kwargs):
-        if not v:
-            raise ValueError(f'Enter {kwargs["field"].name.capitalize()}')
-        return v
-
 
 class ClaimSchema(BaseModel):
     description: str
     claim_type: str
     claim_object_id: int
-
-    @validator('description', 'claim_type', 'claim_object_id')
-    def validate(cls, v, values, **kwargs):
-        if not v:
-            raise ValueError(f'Enter {kwargs["field"].name.capitalize()}')
-        return v

@@ -6,6 +6,8 @@ import {Route, Routes} from 'react-router-dom'
 import Register from "./components/Register/Register";
 import Login from "./components/Login/Login";
 import ClaimPopup from "./components/ClaimPopup/ClaimPopup";
+import AdminLogin from "./components/Login/AdminLogin";
+import AdminPage from "./components/AdminPage/AdminPage";
 
 const App = () => {
   return (
@@ -14,9 +16,11 @@ const App = () => {
         <Route path="/" element={<MainPage/>}></Route>
         <Route path="/profile" element={<Profile/>}></Route>
         <Route path="/watch/:id" element={<OpenVideo/>}></Route>
-          <Route path="/register" element={<Register/>}></Route>
-          <Route path="/login" element={<Login/>}></Route>
-          <Route path="/popup" element={<ClaimPopup/>}></Route>
+        <Route path="/register" element={<Register/>}></Route>
+        <Route path="/login" element={<Login/>}></Route>
+        <Route path="/popup" element={<ClaimPopup/>}></Route>
+        <Route path="/admin/login" element={<AdminLogin/>}></Route>
+        <Route path="admin/main" element={<AdminPage/>}></Route>
       </Routes>
     </div>
   );

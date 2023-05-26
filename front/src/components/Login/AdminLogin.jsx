@@ -5,9 +5,8 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
 
-const Login = () => {
-  document.title = 'Log In'
-
+const AdminLogin = () => {
+  document.title = 'Admin LogIn'
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -46,14 +45,14 @@ const Login = () => {
     if (emailError || passwordError){
       return;
     }
-    const data = getAxiosBody('login',
-        {'user': {'email': email, 'password': password }})
+    const data = getAxiosBody('admin_login',
+        {'admin_schema': {'email': email, 'password': password }})
     const instance = axios.create({withCredentials: true})
-    instance.post('http://127.0.0.1:8000/api/v1/user', data)
+    instance.post('http://127.0.0.1:8000/api/v1/admin', data)
         .then(response => {
           navigate('/');
-          localStorage.removeItem('user');
-          localStorage.setItem('user', email);
+          localStorage.removeItem('admin');
+          localStorage.setItem('admin', email);
         })
         .catch(error => {
           console.log(error);
@@ -81,4 +80,4 @@ const Login = () => {
   );
 };
 
-export default Login
+export default AdminLogin

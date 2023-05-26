@@ -3,12 +3,13 @@ import { ReactComponent as Like } from '../../img/like.svg';
 import { ReactComponent as Arrow } from '../../img/arrow.svg'
 import SearchBar from '../SearchBar/SearchBar';
 import styles from './OpenVideo.module.css';
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import getAxiosBody from "../sendData";
 import axios from "axios";
-import Comment from "../Comment/Comment";
 import VideoPlayer from "../VideoPLayer/VideoPlayer";
+import ClaimPopup from "../ClaimPopup/ClaimPopup";
+
 
 const OpenVideo = () => {
   const [isLiked, setIsLiked] = useState(false);
@@ -16,8 +17,12 @@ const OpenVideo = () => {
   const [video, setVideo] = useState([]);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
+  const [modalActive, setModalActive] = useState(false);
+  const [objectToClaim, setObjectToClaim] = useState(0);
+  const [claimType, setClaimType] = useState('');
 
   const {id} = useParams();
+  const currentUser = localStorage.getItem('user');
 
   useEffect( () => {
     const body = getAxiosBody('get_video', {'id': Number(id)})
@@ -74,14 +79,44 @@ const OpenVideo = () => {
           });
   };
 
+  const deleteComment = (comment_id) => {
+        const body = getAxiosBody('delete_comment', {comment_id: comment_id});
+        const instance = axios.create({withCredentials: true});
+        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+            .then((response) => {
+                if (response.data['result'].status !== 'deleted')
+                    throw new Error();
+                window.location.reload();
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+    };
+
   const commentList = comments.slice().map(comment =>
-    <Comment id={comment.id} owner={comment.owner} text={comment.text}/>
+      (<div key={`comment${comment.id}`} className={styles.comment}>
+            <div className={styles.container}>
+                <span className={styles.owner}>{comment.owner}</span>
+                <div className={styles.inner_container}>
+                    <img className={styles.claim} onClick={() => {
+                        setObjectToClaim(comment.id);
+                        setClaimType('comment');
+                        setModalActive(true);
+                    }} src={require("../../img/claim.png")} width={20} height={20} alt={'Пожаловаться'}/>
+                { currentUser === comment.owner
+                    ? <img className={styles.del_comment} src={require('../../img/delete.png')} onClick={() => deleteComment(comment.id)} width={20} height={20} alt={'Удалить комментарий'}/>
+                    : null}
+                </div>
+            </div>
+            <p className={styles.text}>{comment.text}</p>
+        </div>)
   );
 
   return (
-    <div>
-      <SearchBar/>
-      <div className={styles.main}>
+      <div>
+          <div>
+              <SearchBar/>
+              <div className={styles.main}>
         <div className={styles.render}>
             <div className={styles.video_player}>
                 <VideoPlayer id={id} src={video.url} preview={video.preview}/>
@@ -89,6 +124,11 @@ const OpenVideo = () => {
           <div className={styles.users_info_and_likes}>
             <button className={styles.user_profile_icon_render}><UserAvatar/></button>
             <p className={styles.user_name}>{video.owner}</p>
+              <img className={styles.claim} onClick={() => {
+                  setObjectToClaim(id);
+                  setClaimType('video');
+                  setModalActive(true);
+              }} style={{marginRight: 20}} src={require('../../img/claim.png')} width={20} height={20} alt={"Пожаловаться на видео"}/>
             <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
           </div>
           <div className={styles.description_box} name='description-box'>
@@ -108,7 +148,9 @@ const OpenVideo = () => {
             </form>
           </div>
       </div>
-    </div>
+            </div>
+          <ClaimPopup active={modalActive} setActive={setModalActive} id={objectToClaim} type={claimType}/>
+      </div>
     )
 }
 
