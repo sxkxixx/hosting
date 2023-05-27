@@ -4,7 +4,7 @@ import { ReactComponent as Arrow } from '../../img/arrow.svg'
 import SearchBar from '../SearchBar/SearchBar';
 import styles from './OpenVideo.module.css';
 import React, {useEffect, useState} from "react";
-import {useParams} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import VideoPlayer from "../VideoPLayer/VideoPlayer";
@@ -12,15 +12,16 @@ import ClaimPopup from "../ClaimPopup/ClaimPopup";
 
 
 const OpenVideo = () => {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState(0);
-  const [video, setVideo] = useState([]);
-  const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
   const [modalActive, setModalActive] = useState(false);
   const [objectToClaim, setObjectToClaim] = useState(0);
   const [claimType, setClaimType] = useState('');
+  const [likes, setLikes] = useState(0);
+  const [userInfo, setUserInfo] = useState({});
+  const [videoInfo, setVideoInfo] = useState({});
+  const [comments, setComments] = useState([]);
 
+  const navigate = useNavigate();
   const {id} = useParams();
   const currentUser = localStorage.getItem('user');
 
@@ -29,11 +30,12 @@ const OpenVideo = () => {
     const instance = axios.create({withCredentials: true})
     instance.post('http://127.0.0.1:8000/api/v1/video', body)
         .then(response => {
-          setComments(response.data['result'].comments)
-          setVideo(response.data['result'].video)
-          setIsLiked(response.data['result'].is_liked)
-          setLikes(response.data['result'].video['likes']);
-          document.title = video.title;
+            const data = response.data.result;
+            setUserInfo(data.user);
+            setVideoInfo(data.video);
+            setComments(data.video.comments);
+            setLikes(data.video.likes);
+            document.title = videoInfo.title;
         })
         .catch(err => {
           console.log(err);
@@ -123,17 +125,19 @@ const OpenVideo = () => {
               <div className={styles.main}>
         <div className={styles.render}>
             <div className={styles.video_player}>
-                <VideoPlayer id={id} src={video.url} preview={video.preview}/>
+                <VideoPlayer id={id} src={videoInfo.url} preview={videoInfo.preview}/>
             </div>
           <div className={styles.users_info_and_likes}>
-            <button className={styles.user_profile_icon_render}><UserAvatar/></button>
-            <p className={styles.user_name}>{video.owner}</p>
+            <button className={styles.user_profile_icon_render} onClick={() => navigate(`/user/${userInfo.owner_id}`)}>
+                {userInfo.owner_avatar ? <img className={styles.avatar} src={userInfo.owner_avatar}/> : <UserAvatar/>}
+            </button>
+            <p className={styles.user_name}>{userInfo.owner_email}</p>
               <img className={styles.claim} onClick={() => {
                   setObjectToClaim(id);
                   setClaimType('video');
                   setModalActive(true);
               }} style={{marginRight: 20}} src={require('../../img/claim.png')} width={20} height={20} alt={"Пожаловаться на видео"}/>
-              {localStorage.getItem('user') === video.owner ?
+              {localStorage.getItem('user') === userInfo.owner_email ?
                   <img className={styles.trashcan}
                        onClick={deleteVideo}
                        src={require('../../img/delete.png')} width={20} height={20}/>
@@ -141,8 +145,8 @@ const OpenVideo = () => {
             <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
           </div>
           <div className={styles.description_box} name='description-box'>
-            <p className={styles.title_video}>{video.title}</p>
-            <p className={styles.description_video}>{video.description}</p>
+            <p className={styles.title_video}>{videoInfo.title}</p>
+            <p className={styles.description_video}>{videoInfo.description}</p>
           </div>
         </div>
           <div className={styles.comments} name='comments'>

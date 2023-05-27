@@ -6,7 +6,7 @@ class UserExistsError(BaseError):
     MESSAGE = 'User already exists'
 
 
-class UserNotExistsError(BaseError):
+class NoUserError(BaseError):
     CODE = -32002
     MESSAGE = 'User does not exists'
 

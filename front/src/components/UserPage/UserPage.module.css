@@ -1,0 +1,57 @@
+.header {
+    width: 1500px;
+    margin-top: 70px;
+    display: flex;
+    gap: 50px;
+    padding: 0 100px;
+    margin-bottom: 40px;
+}
+
+.avatar {
+    object-fit: cover;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+}
+
+.info {
+    align-self: center;
+}
+
+.info__text {
+    font-size: 24px;
+    margin: 0;
+    text-decoration: underline;
+}
+
+.info__text:first-child {
+    margin-bottom: 20px;
+}
+
+.btn__subscribe {
+    height: 20%;
+    background-color: black;
+    color: white;
+    font-size: 20px;
+    padding: 10px;
+    border-radius: 50px;
+    align-self: center;
+    margin-left: auto;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.main {
+
+}
+
+.main__videos {
+    padding: 0 100px;
+    display: flex;
+    gap: 20px;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 1600px;
+    margin-bottom: 40px;
+}
+

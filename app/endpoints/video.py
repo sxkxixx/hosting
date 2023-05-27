@@ -3,7 +3,7 @@ import fastapi_jsonrpc as jsonrpc
 from fastapi import HTTPException, Depends, Body, Form, UploadFile, File
 from app.core.models import User, Video, Comment, Like, View
 from app.core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataError
-from app.utils.hasher import get_current_user, get_unique_name
+from app.utils.auth import get_current_user, get_unique_name
 from app.utils.s3_client import upload_file
 from app.core.schemas import CommentUploadSchema
 import logging
@@ -142,18 +142,24 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
     try:
         logging.info(f'Get Video: Video({id}) data returned')
         comments = await video.video_comments.all()
-        return {'video': {
-            'owner': (await User.objects.get(User.id == video.owner.id)).email,
-            'preview': await video.preview_url(),
-            'url': await video.video_url(),
-            'title': video.title,
-            'description': video.description,
-            'likes': await video.likes_amount(),
-        },
-            'comments': [{'id': comment.id,
-                          'owner': (await User.objects.get(User.id == comment.owner.id)).email,
-                          'text': comment.comment_text} for comment in comments],
-            'is_liked': is_liked}
+        owner = await User.objects.get(User.id == video.owner.id)
+        return {
+            'video': {
+                'preview': await video.preview_url(),
+                'url': await video.video_url(),
+                'title': video.title,
+                'description': video.description,
+                'likes': await video.likes_amount(),
+                'comments': [{'id': comment.id,
+                              'owner': (await User.objects.get(User.id == comment.owner.id)).email,
+                              'text': comment.comment_text} for comment in comments]
+            },
+            'user': {
+                'owner_id': owner.id,
+                'owner_avatar': await owner.avatar_url(),
+                'owner_email': owner.email,
+            }
+        }
     except Exception as e:
         logging.error(f'Get Video: {e}')
 

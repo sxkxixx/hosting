@@ -3,7 +3,7 @@ from app.main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
-from app.utils.hasher import Hasher
+from app.utils.auth import Hasher
 from app.tests.utils import get_query_params, url
 
 @pytest.mark.asyncio

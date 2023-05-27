@@ -119,3 +119,13 @@ class Claim(ormar.Model):
     owner: User = ormar.ForeignKey(User, related_name='user_claims', ondelete='CASCADE')
     claim_object_id: int = ormar.Integer()
     status: str = ormar.String(max_length=15, choices=CLAIM_STATUSES, default='sent')
+
+
+class Subscription(ormar.Model):
+    class Meta(BaseMeta):
+        tablename = 'subscriptions'
+
+    id: int = ormar.Integer(primary_key=True)
+    user: User = ormar.ForeignKey(User, related_name='subscribes', ondelete='CASCADE')
+    aim_user: User = ormar.ForeignKey(User, related_name='subscribers', ondelete='CASCADE')
+

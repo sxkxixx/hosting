@@ -4,21 +4,21 @@ import fastapi_jsonrpc as jsonrpc
 from fastapi import Depends, HTTPException, Response, Body
 from app.core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.core.schemas import UserSchema
-from app.utils.hasher import get_current_user, Hasher, get_object_by_id
+from app.utils.auth import get_current_user, Hasher, get_object_by_id
 from app.core.models import User, Claim, Comment
-from app.core.exceptions import AuthError, UserNotExistsError, NoAdminError, WrongDataError
+from app.core.exceptions import AuthError, NoUserError, NoAdminError, WrongDataError
 
 admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
-@admin_route.method(tags=['admin'], errors=[UserNotExistsError, NoAdminError, WrongDataError])
+@admin_route.method(tags=['admin'], errors=[NoUserError, NoAdminError, WrongDataError])
 async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
     try:
         admin: User = await User.objects.get(User.email == admin_schema.email)
         logging.info(f'Admin Login: Admin({admin_schema.email}) loging in')
     except:
-        raise UserNotExistsError()
+        raise NoUserError()
     if not admin.is_superuser:
         logging.warning(f'Admin Login: User({admin.email}) is not Admin')
         raise NoAdminError()

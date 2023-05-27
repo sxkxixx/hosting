@@ -8,6 +8,7 @@ import Login from "./components/Login/Login";
 import ClaimPopup from "./components/ClaimPopup/ClaimPopup";
 import AdminLogin from "./components/Login/AdminLogin";
 import AdminPage from "./components/AdminPage/AdminPage";
+import UserPage from "./components/UserPage/UserPage";
 
 const App = () => {
   return (
@@ -20,7 +21,8 @@ const App = () => {
         <Route path="/login" element={<Login/>}></Route>
         <Route path="/popup" element={<ClaimPopup/>}></Route>
         <Route path="/admin/login" element={<AdminLogin/>}></Route>
-        <Route path="admin/main" element={<AdminPage/>}></Route>
+        <Route path="/admin/main" element={<AdminPage/>}></Route>
+        <Route path="/user/:id" element={<UserPage/>}></Route>
       </Routes>
     </div>
   );
