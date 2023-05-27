@@ -1,9 +1,9 @@
 import pytest_asyncio
-from app.main import app
+from main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
-from app.tests.utils import get_query_params, TEST_USER_EMAIL, TEST_USER_PASSWORD, url, TEST_VIDEO_ID
+from tests.utils import get_query_params, TEST_USER_EMAIL, TEST_USER_PASSWORD, url, TEST_VIDEO_ID
 
 
 @pytest_asyncio.fixture()

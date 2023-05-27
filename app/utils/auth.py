@@ -2,8 +2,8 @@ import datetime
 from passlib.context import CryptContext
 from fastapi import Request, Response
 from jose import jwt
-from app.core.models import User, Comment, Video
-from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from core.models import User, Comment, Video
+from core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

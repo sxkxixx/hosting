@@ -3,11 +3,10 @@
 .gitignore
 Readme.md
 database.db
-.env
+.env.dev
+.env.prod
 docker-compose.yml
 front/node_modules
 **/__pycache__
 app/logs.log
-app/static
-.env-extra
 .dockerignore

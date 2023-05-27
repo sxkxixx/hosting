@@ -1,11 +1,11 @@
 from typing import Optional
 import fastapi_jsonrpc as jsonrpc
 from fastapi import HTTPException, Depends, Body, Form, UploadFile, File
-from app.core.models import User, Video, Comment, Like, View
-from app.core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataError
-from app.utils.auth import get_current_user, get_unique_name
-from app.utils.s3_client import upload_file
-from app.core.schemas import CommentUploadSchema
+from core.models import User, Video, Comment, Like, View
+from core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataError
+from utils.auth import get_current_user, get_unique_name
+from utils.s3_client import upload_file
+from core.schemas import CommentUploadSchema
 import logging
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')

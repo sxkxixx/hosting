@@ -1,4 +1,4 @@
-from app.core.models import Video
+from core.models import Video
 
 
 async def get_user_videos(user_id: int):

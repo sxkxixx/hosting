@@ -1,9 +1,9 @@
 import pytest_asyncio
-from app.main import app
+from main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
-from app.tests.utils import ADMIN_EMAIL, ADMIN_PASSWORD, url, get_query_params, TEST_USER_EMAIL, TEST_USER_PASSWORD
+from tests.utils import get_query_params, ADMIN_PASSWORD, url, TEST_USER_EMAIL, TEST_USER_PASSWORD, ADMIN_EMAIL
 
 
 # -p no:cacheprovider

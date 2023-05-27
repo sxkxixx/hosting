@@ -1,8 +1,8 @@
 import logging
 import aioboto3
-from app.core.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, REGION_NAME, BUCKET_NAME
+from core.config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, REGION_NAME, BUCKET_NAME
 
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 async_s3_session = aioboto3.Session(

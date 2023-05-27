@@ -1,10 +1,10 @@
 import datetime
-from app.main import app
+from main import app
 import pytest
 from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
-from app.utils.auth import Hasher
-from app.tests.utils import get_query_params, url
+from utils.auth import Hasher
+from tests.utils import get_query_params, url
 
 @pytest.mark.asyncio
 async def test_register_method():

@@ -1,20 +1,20 @@
 import datetime
 from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
-from app.utils.auth import Hasher, get_current_user
-from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
-from app.core.models import User, Video, Role, Claim, Subscription
-from app.core.schemas import UserRegister, UserSchema, ClaimSchema
-from app.core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthError
+from utils.auth import Hasher, get_current_user
+from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
+from core.models import User, Video, Role, Claim, Subscription
+from core.schemas import UserRegister, UserSchema, ClaimSchema
+from core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthError
 import fastapi_jsonrpc as jsonrpc
-from app.utils.s3_client import upload_file
-from app.utils.auth import get_unique_name
-from app.core.config import AVATARS_DIR
-from app.utils.utils import get_user_videos
+from utils.s3_client import upload_file
+from utils.auth import get_unique_name
+from core.config import AVATARS_DIR
+from utils.utils import get_user_videos
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
 
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'], errors=[UserExistsError, WrongDataError])

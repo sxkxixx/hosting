@@ -2,11 +2,11 @@ import logging
 import datetime
 import fastapi_jsonrpc as jsonrpc
 from fastapi import Depends, HTTPException, Response, Body
-from app.core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.core.schemas import UserSchema
-from app.utils.auth import get_current_user, Hasher, get_object_by_id
-from app.core.models import User, Claim, Comment
-from app.core.exceptions import AuthError, NoUserError, NoAdminError, WrongDataError
+from core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
+from core.schemas import UserSchema
+from utils.auth import get_current_user, Hasher, get_object_by_id
+from core.models import User, Claim, Comment
+from core.exceptions import AuthError, NoUserError, NoAdminError, WrongDataError
 
 admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
 logging.basicConfig(filename='app/logs.log', level=logging.INFO)
