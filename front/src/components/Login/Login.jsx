@@ -2,7 +2,7 @@ import styles from './Login.module.css';
 import React, {useState} from "react";
 import getAxiosBody from "../sendData";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 
 const Login = () => {
@@ -62,19 +62,20 @@ const Login = () => {
 
   return (
       <div className={styles.container}>
-        <form className={styles.form} onSubmit={handleSubmit}>
-      <h1 className={styles.title}>Log In</h1>
-      <label className={styles.label}>
-        Email:
-        <input className={styles.input} type="text" value={email} onChange={handleEmailChange} />
-        {emailError && <div style={{ color: 'red' }}>{emailError}</div>}
-      </label><br/>
-      <label className={styles.label}>
-        Password:
-        <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
-        {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
-      </label><br/>
-      <button className={styles.btn} type="submit">Submit</button>
+          <form className={styles.form} onSubmit={handleSubmit}>
+              <h1 className={styles.title}>Log In</h1>
+              <label className={styles.label}>
+                  Email:
+                  <input className={styles.input} type="text" value={email} onChange={handleEmailChange} />
+                  {emailError && <div style={{ color: 'red' }}>{emailError}</div>}
+              </label><br/>
+              <label className={styles.label}>
+                  Password:
+                  <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
+                  {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
+              </label><br/>
+              <button className={styles.btn} type="submit">Submit</button>
+              <p>Нет аккаунта? <Link to={'/register'}>Зарегистрируйтесь</Link></p>
     </form>
       </div>
 

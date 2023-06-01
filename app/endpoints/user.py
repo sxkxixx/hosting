@@ -1,14 +1,12 @@
 import datetime
 from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
-from utils.auth import Hasher, get_current_user
-from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES
+from utils.auth import Hasher, get_current_user, get_unique_name
+from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, AVATARS_DIR
 from core.models import User, Video, Role, Claim, Subscription
 from core.schemas import UserRegister, UserSchema, ClaimSchema
 from core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthError
 import fastapi_jsonrpc as jsonrpc
 from utils.s3_client import upload_file
-from utils.auth import get_unique_name
-from core.config import AVATARS_DIR
 from utils.utils import get_user_videos
 import logging
 

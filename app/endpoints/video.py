@@ -13,9 +13,9 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])
-async def main_page(user: User = Depends(get_current_user)) -> dict :
+async def main_page(user: User = Depends(get_current_user)) -> dict:
     try:
-        videos = await Video.objects.all()
+        videos = sorted(await Video.objects.select_related('user_views').all(), key=lambda x: len(x.user_views), reverse=True)
         logging.info(f'Main Page')
         return {
             'user': user.email if user else None,
@@ -23,6 +23,7 @@ async def main_page(user: User = Depends(get_current_user)) -> dict :
                 'id': video.id,
                 'title': video.title,
                 'preview': await video.preview_url(),
+                'views': await video.views_amount(),
                 'owner': {
                     'id': video.owner.id,
                     'email': (await User.objects.get(User.id == video.owner.id)).email
@@ -150,6 +151,7 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
                 'title': video.title,
                 'description': video.description,
                 'likes': await video.likes_amount(),
+                'views': await video.views_amount(),
                 'comments': [{'id': comment.id,
                               'owner': (await User.objects.get(User.id == comment.owner.id)).email,
                               'text': comment.comment_text} for comment in comments]

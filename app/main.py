@@ -19,7 +19,7 @@ app.bind_entrypoint(admin_route)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://127.0.0.1:3000'],
+    allow_origins=['http://localhost:3000', 'http://127.0.0.1:3000', 'localhost:3000'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*']
@@ -42,5 +42,4 @@ async def shutdown() -> None:
 
 engine = sqlalchemy.create_engine(DATABASE_URL)
 metadata.create_all(engine)
-asyncio.run(with_connect(create_roles))
-
+# asyncio.run(with_connect(create_roles))

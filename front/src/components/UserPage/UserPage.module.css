@@ -1,5 +1,5 @@
 .header {
-    width: 1500px;
+    width: 80%;
     margin-top: 70px;
     display: flex;
     gap: 50px;
@@ -51,7 +51,7 @@
     gap: 20px;
     flex-direction: row;
     flex-wrap: wrap;
-    width: 1600px;
+    width: 85%;
     margin-bottom: 40px;
 }
 

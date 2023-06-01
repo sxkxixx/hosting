@@ -2,7 +2,7 @@ import styles from './Register.module.css';
 import React, {useState} from 'react';
 import getAxiosBody from "../sendData";
 import axios from "axios";
-import {useNavigate} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 
 const Register = () => {
     document.title = 'Sign Up';
@@ -90,29 +90,30 @@ const Register = () => {
   return (
       <div className={styles.container}>
           <form className={styles.form} onSubmit={handleSubmit}>
-        <h1 className={styles.title}>Sign Up</h1>
-      <label className={styles.label}>
-        Email:
-        <input className={styles.input} type="text" value={email} onChange={handleEmailChange} />
-        {emailError && <div style={{ color: 'red' }}>{emailError}</div>}
-      </label><br/>
-      <label className={styles.label}>
-        Username:
-        <input className={styles.input} type="text" value={username} onChange={handleUsernameChange} />
-        {usernameError && <div style={{ color: 'red' }}>{usernameError}</div>}
-      </label><br/>
-      <label className={styles.label}>
-        Password:
-        <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
-        {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
-      </label><br/>
-      <label className={styles.label}>
-        Repeat your password:
-        <input className={styles.input} type="password" value={passwordR} onChange={handlePasswordRChange} />
-        {passwordRError && <div style={{ color: 'red' }}>{passwordRError}</div>}
-      </label><br/>
-      <button className={styles.btn} type="submit">Submit</button>
-    </form>
+              <h1 className={styles.title}>Sign Up</h1>
+              <label className={styles.label}>
+                  Email:
+                  <input className={styles.input} type="text" value={email} onChange={handleEmailChange} />
+                  {emailError && <div style={{ color: 'red' }}>{emailError}</div>}
+              </label><br/>
+              <label className={styles.label}>
+                  Username:
+                  <input className={styles.input} type="text" value={username} onChange={handleUsernameChange} />
+                  {usernameError && <div style={{ color: 'red' }}>{usernameError}</div>}
+              </label><br/>
+              <label className={styles.label}>
+                  Password:
+                  <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
+                  {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
+              </label><br/>
+              <label className={styles.label}>
+                  Repeat your password:
+                  <input className={styles.input} type="password" value={passwordR} onChange={handlePasswordRChange} />
+                  {passwordRError && <div style={{ color: 'red' }}>{passwordRError}</div>}
+              </label><br/>
+              <button className={styles.btn} type="submit">Submit</button>
+              <p>Уже есть аккаунт? <Link to={'/login'}>Войдите</Link></p>
+          </form>
       </div>
   );
 };

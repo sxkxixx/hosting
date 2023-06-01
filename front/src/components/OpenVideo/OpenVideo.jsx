@@ -145,7 +145,10 @@ const OpenVideo = () => {
             <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
           </div>
           <div className={styles.description_box} name='description-box'>
-            <p className={styles.title_video}>{videoInfo.title}</p>
+              <div className={styles.container_views__title}>
+                  <p className={styles.title_video}>{videoInfo.title}</p>
+                  <p>Просмотров: {videoInfo.views}</p>
+              </div>
             <p className={styles.description_video}>{videoInfo.description}</p>
           </div>
         </div>

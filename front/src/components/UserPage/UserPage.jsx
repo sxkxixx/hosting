@@ -25,6 +25,7 @@ const UserPage = () => {
                 setUserInfo(data.user);
                 setVideosInfo(data.videos);
                 setSubscribed(data.subscribed);
+                document.title = userInfo.username;
             })
             .catch((error) => {
                 navigate('/');
