@@ -61,11 +61,6 @@ const Profile =  () => {
             });
     };
 
-
-    const videoList = videos.map((video) =>
-        <VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email} isProfile={true}/>
-    )
-
     return (
         <div className={styles.main_container_profile}>
             <div className={styles.container_left}>
@@ -83,7 +78,7 @@ const Profile =  () => {
                 </div>
                 <h3 className=''>Мои видео:</h3>
                 <div className={styles.videos_container}>
-                    { videoList }
+                    { videos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email} isUsersPage={true}/>) }
                 </div>
             </div>
 

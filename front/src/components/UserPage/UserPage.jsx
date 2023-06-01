@@ -84,7 +84,7 @@ const UserPage = () => {
             <div className={styles.main}>
                 <p className={styles.info__text} style={{marginBottom: "20px", marginLeft: "100px"}}>Видео пользователя</p>
                 <div className={styles.main__videos}>
-                    {videosInfo.slice().map((video) => <VideoCard id={video.id} owner={userInfo.email} preview={video.preview_url} title={video.title}/>)}
+                    {videosInfo.slice().map((video) => <VideoCard id={video.id} owner={userInfo.email} preview={video.preview_url} title={video.title} isUsersPage={true}/>)}
                 </div>
             </div>
 

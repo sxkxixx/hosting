@@ -24,13 +24,12 @@ export const MainPage = () => {
         })
   }, [setVideos]);
 
-  const videosList = videos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview} owner={video.owner.email} views={video.views}/>);
 
   return (
   <div>
     <SearchBar/>
     <div className={styles.videos_container}>
-      {videosList}
+      {videos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview} owner={video.owner.email} views={video.views} owner_avatar={video.owner.avatar}/>)}
     </div>
   </div>
   )

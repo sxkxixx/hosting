@@ -26,7 +26,8 @@ async def main_page(user: User = Depends(get_current_user)) -> dict:
                 'views': await video.views_amount(),
                 'owner': {
                     'id': video.owner.id,
-                    'email': (await User.objects.get(User.id == video.owner.id)).email
+                    'email': (await User.objects.get(User.id == video.owner.id)).email,
+                    'avatar': await (await User.objects.get(User.id == video.owner.id)).avatar_url()
                 }
             } for video in videos]
         }
