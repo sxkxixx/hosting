@@ -2,11 +2,12 @@ import {
     Player, LoadingSpinner, ReplayControl, ForwardControl, CurrentTimeDisplay,
     VolumeMenuButton, ControlBar, BigPlayButton, PlayToggle
 } from "video-react";
-import '../../../node_modules/video-react/dist/video-react.css'
+import '../../../node_modules/video-react/dist/video-react.css';
+
 
 const VideoPlayer = ({id ,src, preview}) => {
     return (
-        <Player src={src} poster={preview} fluid={true}>
+        <Player src={src} poster={preview} fluid={false} height={600} width={"100%"}>
             <BigPlayButton position="center"/>
             <ControlBar autoHide={true}>
                 <PlayToggle/>

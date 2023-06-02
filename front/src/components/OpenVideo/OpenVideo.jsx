@@ -12,76 +12,76 @@ import ClaimPopup from "../ClaimPopup/ClaimPopup";
 
 
 const OpenVideo = () => {
-  const [commentText, setCommentText] = useState('');
-  const [modalActive, setModalActive] = useState(false);
-  const [objectToClaim, setObjectToClaim] = useState(0);
-  const [claimType, setClaimType] = useState('');
-  const [likes, setLikes] = useState(0);
-  const [userInfo, setUserInfo] = useState({});
-  const [videoInfo, setVideoInfo] = useState({});
-  const [comments, setComments] = useState([]);
+    const [commentText, setCommentText] = useState('');
+    const [modalActive, setModalActive] = useState(false);
+    const [objectToClaim, setObjectToClaim] = useState(0);
+    const [claimType, setClaimType] = useState('');
+    const [likes, setLikes] = useState(0);
+    const [userInfo, setUserInfo] = useState({});
+    const [videoInfo, setVideoInfo] = useState({});
+    const [comments, setComments] = useState([]);
 
-  const navigate = useNavigate();
-  const {id} = useParams();
-  const currentUser = localStorage.getItem('user');
+    const navigate = useNavigate();
+    const {id} = useParams();
+    const currentUser = localStorage.getItem('user');
 
-  useEffect( () => {
-    const body = getAxiosBody('get_video', {'id': Number(id)})
-    const instance = axios.create({withCredentials: true})
-    instance.post('http://127.0.0.1:8000/api/v1/video', body)
-        .then(response => {
-            const data = response.data.result;
-            setUserInfo(data.user);
-            setVideoInfo(data.video);
-            setComments(data.video.comments);
-            setLikes(data.video.likes);
-            document.title = videoInfo.title;
-        })
-        .catch(err => {
-          console.log(err);
-        })
-  }, []);
+    useEffect( () => {
+        const body = getAxiosBody('get_video', {'id': Number(id)})
+        const instance = axios.create({withCredentials: true})
+        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+            .then(response => {
+                const data = response.data.result;
+                setUserInfo(data.user);
+                setVideoInfo(data.video);
+                setComments(data.video.comments);
+                setLikes(data.video.likes);
+                document.title = videoInfo.title;
+            })
+            .catch(err => {
+                console.log(err);
+            })
+    }, []);
 
-  const setRemoveLike = () => {
-      const body = getAxiosBody('change_like_status', {'video_id': Number(id)})
-      const instance = axios.create({withCredentials: true});
-      instance.post('http://127.0.0.1:8000/api/v1/video', body)
-          .then((response) => {
-              const data = response.data['result'];
-              if (data['status'] === 'Added') {
-                  setLikes(likes + 1);
-              }
-              else {
-                setLikes(likes - 1);
-              }
-          })
-          .catch((err) => {
-              console.log(err);
-          });
-  };
+    const setRemoveLike = () => {
+        const body = getAxiosBody('change_like_status', {'video_id': Number(id)})
+        const instance = axios.create({withCredentials: true});
+        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+            .then((response) => {
+                const data = response.data['result'];
+                if (data['status'] === 'Added') {
+                    setLikes(likes + 1);
+                }
+                else {
+                    setLikes(likes - 1);
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
-  const handleCommentTextChange = event => setCommentText(event.target.value);
-  const clearFields = event => event.target.reset();
+    const handleCommentTextChange = event => setCommentText(event.target.value);
+    const clearFields = event => event.target.reset();
 
-  const sendComment = (event) => {
-      event.preventDefault();
-      if (!commentText)
-          return;
-      const body = getAxiosBody('upload_comment', {comment_data: {video_id: Number(id), comment_text: commentText}})
-      const instance = axios.create({withCredentials: true});
-      instance.post('http://127.0.0.1:8000/api/v1/video', body)
-          .then((response) => {
-              const data = response.data['result'];
-              setComments([...comments, {id: data['comment'], owner: data['user'], text: commentText}])
-              setCommentText('');
-          })
-          .catch()
-          .finally(() => {
-              clearFields(event);
-          });
-  };
+    const sendComment = (event) => {
+        event.preventDefault();
+        if (!commentText)
+            return;
+        const body = getAxiosBody('upload_comment', {comment_data: {video_id: Number(id), comment_text: commentText}})
+        const instance = axios.create({withCredentials: true});
+        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+            .then((response) => {
+                const data = response.data['result'];
+                setComments([...comments, {id: data['comment'], owner: data['user'], text: commentText}])
+                setCommentText('');
+            })
+            .catch()
+            .finally(() => {
+                clearFields(event);
+            });
+    };
 
-  const deleteComment = (comment_id) => {
+    const deleteComment = (comment_id) => {
         const body = getAxiosBody('delete_comment', {comment_id: comment_id});
         const instance = axios.create({withCredentials: true});
         instance.post('http://127.0.0.1:8000/api/v1/video', body)
@@ -95,8 +95,8 @@ const OpenVideo = () => {
             })
     };
 
-  const commentList = comments.slice().map(comment =>
-      (<div key={`comment${comment.id}`} className={styles.comment}>
+    const commentList = comments.slice().map(comment =>
+        (<div key={`comment${comment.id}`} className={styles.comment}>
             <div className={styles.container}>
                 <span className={styles.owner}>{comment.owner}</span>
                 <div className={styles.inner_container}>
@@ -114,12 +114,23 @@ const OpenVideo = () => {
         </div>)
   );
 
-  const deleteVideo = () => {
+    const deleteVideo = () => {
+        const body = getAxiosBody('delete_video', {video_id: id});
+        const instance = axios.create({withCredentials: true});
+        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+            .then(response => {
+                const data = response.data;
+                if ('error' in data) {
+                    throw new Error();
+                }
+                if (data.result.status === 'deleted') {
+                    navigate('/');
+                }
+            })
+    };
 
-  };
-
-  return (
-      <div>
+    return (
+        <div>
           <div>
               <SearchBar/>
               <div className={styles.main}>
