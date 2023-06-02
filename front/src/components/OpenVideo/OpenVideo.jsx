@@ -38,7 +38,7 @@ const OpenVideo = () => {
                 document.title = videoInfo.title;
             })
             .catch(err => {
-                console.log(err);
+                navigate('/');
             })
     }, []);
 
@@ -91,7 +91,6 @@ const OpenVideo = () => {
                 window.location.reload();
             })
             .catch((err) => {
-                console.log(err);
             })
     };
 

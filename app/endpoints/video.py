@@ -3,7 +3,7 @@ import fastapi_jsonrpc as jsonrpc
 from fastapi import HTTPException, Depends, Body, Form, UploadFile, File
 from core.models import User, Video, Comment, Like, View
 from core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataError
-from utils.auth import get_current_user, get_unique_name
+from utils.auth import get_current_user_v2, get_unique_name
 from utils.s3_client import upload_file
 from core.schemas import CommentUploadSchema
 import logging
@@ -13,7 +13,7 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])
-async def main_page(user: User = Depends(get_current_user)) -> dict:
+async def main_page(user: User = Depends(get_current_user_v2)) -> dict:
     try:
         videos = sorted(await Video.objects.select_related('user_views').all(), key=lambda x: len(x.user_views), reverse=True)
         logging.info(f'Main Page')
@@ -36,7 +36,7 @@ async def main_page(user: User = Depends(get_current_user)) -> dict:
 
 
 @video_router.post('/upload_video', tags=['video'])
-async def upload_video(user: User = Depends(get_current_user), title: str = Form(...),
+async def upload_video(user: User = Depends(get_current_user_v2), title: str = Form(...),
                        description: str = Form(...),
                        video_file: UploadFile = File(...),
                        preview_file: Optional[UploadFile | None] = File(...)):
@@ -66,13 +66,12 @@ async def upload_video(user: User = Depends(get_current_user), title: str = Form
 
 
 @video_router.method(tags=['video'], errors=[AuthError, NoVideoError])
-async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user)) -> dict:
+async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         logging.warning(f'Upload Comment: No User')
         raise AuthError()
-    try:
-        video = await Video.objects.get(comment_data.video_id == Video.id)
-    except:
+    video = await Video.objects.get_or_none(comment_data.video_id == Video.id)
+    if not video:
         logging.warning(f'Upload Comment: No Video: {comment_data.video_id}')
         raise NoVideoError()
     comment = await Comment(
@@ -85,13 +84,12 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
 
 
 @video_router.method(tags=['video'], errors=[AuthError, NoCommentError, WrongDataError])
-async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_current_user)) -> dict:
+async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         logging.warning(f'Delete Comment: No User')
         raise AuthError()
-    try:
-        comment = await Comment.objects.get(Comment.id == comment_id)
-    except:
+    comment = await Comment.objects.get_or_none(Comment.id == comment_id)
+    if not comment:
         logging.warning(f'Delete Comment: No comment {comment_id}')
         raise NoCommentError()
     if comment.owner == user:
@@ -104,13 +102,12 @@ async def delete_comment(comment_id: int = Body(...), user: User = Depends(get_c
 
 
 @video_router.method(tags=['video'], errors=[AuthError, NoVideoError])
-async def change_like_status(video_id: int, user: User = Depends(get_current_user)) -> dict:
+async def change_like_status(video_id: int, user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         logging.warning(f'Change Like Status: No User')
         raise AuthError()
-    try:
-        video = await Video.objects.get(Video.id == video_id)
-    except:
+    video = await Video.objects.get_or_none(Video.id == video_id)
+    if not video:
         logging.warning(f'Change Like Status: No Video')
         raise NoVideoError()
     try:
@@ -126,21 +123,13 @@ async def change_like_status(video_id: int, user: User = Depends(get_current_use
 
 
 @video_router.method(tags=['video'], errors=[NoVideoError])
-async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
-    try:
-        video = await Video.objects.get(id == Video.id)
-    except:
+async def get_video(id: int, user: User = Depends(get_current_user_v2)) -> dict:
+    video = await Video.objects.get_or_none(id == Video.id)
+    if not video:
         logging.warning(f'Get Video: No Video {id}')
         raise NoVideoError()
-    is_liked = False
     if user:
         await View.objects.create(video=id, user=user.id)
-        try:
-            await Like.objects.get(Like.video == video.id and Like.user == user.id)
-            is_liked = True
-            await View.objects.create(user=user, video=video)
-        except:
-            is_liked = False
     try:
         logging.info(f'Get Video: Video({id}) data returned')
         comments = await video.video_comments.all()
@@ -168,13 +157,12 @@ async def get_video(id: int, user: User = Depends(get_current_user)) -> dict:
 
 
 @video_router.method(tags=['video'], errors=[AuthError, NoVideoError, WrongDataError])
-async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user)) -> dict:
+async def delete_video(video_id: int = Body(...), user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         logging.warning(f'Delete Video: No User')
         raise AuthError()
-    try:
-        video = await Video.objects.get(Video.id == video_id)
-    except:
+    video = await Video.objects.get_or_none(Video.id == video_id)
+    if not video:
         logging.warning(f'Delete Video: User {user.id}, No Video {video_id}')
         raise NoVideoError()
     if user == video.owner:

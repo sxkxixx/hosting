@@ -27,15 +27,41 @@ class Hasher:
         token = jwt.encode(to_encode_data, key=SECRET_KEY, algorithm=ALGORITHM)
         return token
 
+    @staticmethod
+    def is_expired(token):
+        date = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])['expire']
+        expires_in = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S.%f')
+        current_time = datetime.datetime.utcnow()
+        return expires_in > current_time
 
-def update_token(response: Response, data: dict, token_type: str,
-                 expire: int):
+
+def update_token(response: Response, data: dict, token_type: str, expire: int):
     response.delete_cookie(token_type)
     token = Hasher.get_encode_token(data)
     response.set_cookie(key=token_type, value=token, httponly=True, expires=expire)
 
 
-async def get_current_user(request: Request, response: Response) -> User | None:
+async def get_user_by_token(token):
+    try:
+        email = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])['sub']
+    except:
+        return None
+    return await User.objects.get(User.email == email)
+
+
+async def get_current_user_v2(request: Request, response: Response) -> User | None:
+    access_token, refresh_token = request.cookies.get('access_token'), request.cookies.get('refresh_token')
+    if not refresh_token:
+        return None
+    if access_token:
+        return await get_user_by_token(access_token)
+    else:
+        user = await get_user_by_token(refresh_token)
+        update_token(response, {'sub': user.email}, 'access_token', ACCESS_TOKEN_EXPIRE_MINUTES)
+        return user
+
+
+async def get_current_user_v1(request: Request, response: Response) -> User | None:
     token = request.cookies.get('access_token', None)
     refresh_token = request.cookies.get('refresh_token', None)
     if not refresh_token:
@@ -62,17 +88,13 @@ async def get_current_user(request: Request, response: Response) -> User | None:
 async def get_object_by_id(object_type: str, object_id: int):
     if object_type == 'comment':
         try:
-            comment = await Comment.objects.get(Comment.id == object_id)
+            return await Comment.objects.get(Comment.id == object_id)
         except:
             return None
-        return {'id': comment.id, 'status': 'comment', 'comment_text': comment.comment_text}
-    elif object_type == 'video':
-        try:
-            video = await Video.objects.get(Video.id == object_id)
-        except:
-            return None
-        return {'id': video.id, 'status': 'video', 'title': video.title,
-                'description': video.description, 'url': video.video_url}
+    try:
+        return await Video.objects.get(Video.id == object_id)
+    except:
+        return None
 
 
 def get_unique_name(filename: str):

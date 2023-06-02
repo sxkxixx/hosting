@@ -1,6 +1,6 @@
 import datetime
 from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
-from utils.auth import Hasher, get_current_user, get_unique_name
+from utils.auth import Hasher, get_unique_name, get_current_user_v2
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, AVATARS_DIR
 from core.models import User, Video, Role, Claim, Subscription
 from core.schemas import UserRegister, UserSchema, ClaimSchema
@@ -11,8 +11,7 @@ from utils.utils import get_user_videos
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
-
-logging.basicConfig(filename='logs.log', level=logging.INFO)
+logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'], errors=[UserExistsError, WrongDataError])
@@ -55,12 +54,10 @@ async def login(response: Response, user: UserSchema) -> dict:
     try:
         if Hasher.verify_password(password, user.hashed_password):
             data = {'sub': email}
-            access_token = Hasher.get_encode_token(data)
+            access_token = Hasher.get_encode_token(data,)
             refresh_token = Hasher.get_encode_token(data, datetime.timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES))
-            response.set_cookie(key='access_token', value=access_token, httponly=True,
-                                expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
-                                expires=REFRESH_TOKEN_EXPIRE_MINUTES)
+            response.set_cookie(key='access_token', value=access_token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, expires=REFRESH_TOKEN_EXPIRE_MINUTES)
             logging.info(f'Login: Successfully login {user.email}')
             return {'user': user.email, 'status': 'Authorized'}
         logging.warning(f'Login: Incorrect password for {user.email}')
@@ -71,7 +68,7 @@ async def login(response: Response, user: UserSchema) -> dict:
 
 
 @user_route.method(tags=['user'])
-def logout(response: Response, user: User = Depends(get_current_user)) -> dict:
+def logout(response: Response, user: User = Depends(get_current_user_v2)) -> dict:
     if user:
         response.delete_cookie('access_token')
         response.delete_cookie('refresh_token')
@@ -80,15 +77,11 @@ def logout(response: Response, user: User = Depends(get_current_user)) -> dict:
 
 
 @user_route.method(tags=['user'], errors=[AuthError])
-async def profile(user: User = Depends(get_current_user)) -> dict:
+async def profile(user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         logging.warning(f'Profile: No user')
         raise AuthError()
-    try:
-        videos = await Video.objects.filter(user.id == Video.owner.id).all()
-    except:
-        logging.error(f'Profile: No video for user {user.id}')
-        videos = []
+    videos = await Video.objects.filter(user.id == Video.owner.id).all()
     context = {
         'avatar': await user.avatar_url(),
         'username': user.username,
@@ -99,7 +92,7 @@ async def profile(user: User = Depends(get_current_user)) -> dict:
 
 
 @user_route.method(tags=['user'], errors=[AuthError, WrongDataError])
-async def create_claim(claim_schema: ClaimSchema = Body(...), user: User = Depends(get_current_user)) -> dict:
+async def create_claim(claim_schema: ClaimSchema = Body(...), user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         logging.warning('Send Claim: No User')
         raise AuthError()
@@ -121,7 +114,7 @@ async def create_claim(claim_schema: ClaimSchema = Body(...), user: User = Depen
 
 
 @user_route.method(tags=['user'], errors=[AuthError])
-def current_user(user: User = Depends(get_current_user)) -> dict:
+def current_user(user: User = Depends(get_current_user_v2)) -> dict:
     if not user:
         raise AuthError()
     logging.info(f'Current User: {user.email}')
@@ -129,7 +122,7 @@ def current_user(user: User = Depends(get_current_user)) -> dict:
 
 
 @user_route.method(tags=['user'], errors=[AuthError])
-async def delete_user(user: User = Depends(get_current_user)) -> str:
+async def delete_user(user: User = Depends(get_current_user_v2)) -> str:
     if not user:
         raise AuthError()
     await user.delete()
@@ -138,7 +131,7 @@ async def delete_user(user: User = Depends(get_current_user)) -> str:
 
 
 @user_route.post(tags=['user'], path='/upload_avatar')
-async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get_current_user)):
+async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get_current_user_v2)):
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
     unique_avatar_name = AVATARS_DIR + get_unique_name(avatar.filename)
@@ -150,15 +143,11 @@ async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get
 
 
 @user_route.method(tags=['user'], errors=[NoUserError])
-async def get_user_page(user_id: int, current_user: User = Depends(get_current_user)) -> dict:
-    try:
-        user = await User.objects.get(User.id == user_id)
-    except:
+async def get_user_page(user_id: int, current_user: User = Depends(get_current_user_v2)) -> dict:
+    user = await User.objects.get_or_none(User.id == user_id)
+    if not user:
         raise NoUserError()
-    try:
-        subscribed = await Subscription.objects.get((Subscription.user.id == current_user.id) & (Subscription.aim_user.id == user_id))
-    except:
-        subscribed = None
+    subscribed = await Subscription.objects.get_or_none((Subscription.user.id == current_user.id) & (Subscription.aim_user.id == user_id))
     return {
         'user': {
             'id': user.id,
@@ -172,14 +161,13 @@ async def get_user_page(user_id: int, current_user: User = Depends(get_current_u
 
 
 @user_route.method(tags=['user'], errors=[AuthError, NoUserError])
-async def set_subscribe(user_id: int, current_user: User = Depends(get_current_user)) -> dict:
+async def set_subscribe(user_id: int, current_user: User = Depends(get_current_user_v2)) -> dict:
     if not current_user:
         raise AuthError
     if current_user.id == user_id:
         raise WrongDataError()
-    try:
-        aim_user = await User.objects.get(User.id == user_id)
-    except:
+    aim_user = await User.objects.get_or_none(User.id == user_id)
+    if not aim_user:
         raise NoUserError()
     try:
         await Subscription.objects.create(
@@ -192,12 +180,11 @@ async def set_subscribe(user_id: int, current_user: User = Depends(get_current_u
 
 
 @user_route.method(tags=['user'], errors=[AuthError, NoUserError])
-async def delete_subscribe(user_id: int, current_user: User = Depends(get_current_user)) -> dict:
+async def delete_subscribe(user_id: int, current_user: User = Depends(get_current_user_v2)) -> dict:
     if not current_user:
         raise AuthError
-    try:
-        subscription = await Subscription.objects.get((Subscription.user.id == current_user.id) & (Subscription.aim_user.id == user_id))
-    except:
+    subscription = await Subscription.objects.get_or_none((Subscription.user.id == current_user.id) & (Subscription.aim_user.id == user_id))
+    if not subscription:
         raise WrongDataError()
     await subscription.delete()
     return {'user': current_user.id, 'aim_user': user_id, 'status': 'deleted'}

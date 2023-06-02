@@ -17,9 +17,10 @@ app.bind_entrypoint(user_route)
 app.bind_entrypoint(video_router)
 app.bind_entrypoint(admin_route)
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://127.0.0.1:3000', 'localhost:3000'],
+    allow_origins=['http://localhost:3000', 'http://127.0.0.1:3000'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*']

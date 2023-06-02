@@ -4,7 +4,7 @@ import fastapi_jsonrpc as jsonrpc
 from fastapi import Depends, HTTPException, Response, Body
 from core.config import REFRESH_TOKEN_EXPIRE_MINUTES, ACCESS_TOKEN_EXPIRE_MINUTES
 from core.schemas import UserSchema
-from utils.auth import get_current_user, Hasher, get_object_by_id
+from utils.auth import get_current_user_v2, Hasher, get_object_by_id
 from core.models import User, Claim, Comment
 from core.exceptions import AuthError, NoUserError, NoAdminError, WrongDataError
 
@@ -14,10 +14,9 @@ logging.basicConfig(filename='app/logs.log', level=logging.INFO)
 
 @admin_route.method(tags=['admin'], errors=[NoUserError, NoAdminError, WrongDataError])
 async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
-    try:
-        admin: User = await User.objects.get(User.email == admin_schema.email)
+    admin: User = await User.objects.get_or_none(User.email == admin_schema.email)
+    if not admin:
         logging.info(f'Admin Login: Admin({admin_schema.email}) loging in')
-    except:
         raise NoUserError()
     if not admin.is_superuser:
         logging.warning(f'Admin Login: User({admin.email}) is not Admin')
@@ -27,18 +26,17 @@ async def admin_login(admin_schema: UserSchema, response: Response) -> dict:
         access_token = Hasher.get_encode_token(data)
         refresh_token = Hasher.get_encode_token(data, datetime.timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES))
         response.set_cookie(key='access_token', value=access_token, httponly=True, expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
-                            expires=REFRESH_TOKEN_EXPIRE_MINUTES)
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, expires=REFRESH_TOKEN_EXPIRE_MINUTES)
         logging.info(f'Admin Login: Successfully login {admin.email}')
         return {'user': admin.email, 'status': 'Authorized'}
     logging.error(f'Admin Login: Incorrect password for Admin({admin.email})')
     raise WrongDataError()
 
 
-@admin_route.method(tags=['admin'], errors=[NoAdminError])
-async def admin_claims(admin: User = Depends(get_current_user)) -> dict:
+@admin_route.method(tags=['admin'], errors=[AuthError])
+async def admin_claims(admin: User = Depends(get_current_user_v2)) -> dict:
     if not admin.is_superuser:
-        raise NoAdminError()
+        raise AuthError()
     try:
         comment_claims = [
             {'id': claim.id, 'comment': (await Comment.objects.get(Comment.id == claim.claim_object_id)).comment_text,
@@ -55,25 +53,28 @@ async def admin_claims(admin: User = Depends(get_current_user)) -> dict:
         print(e)
 
 
-@admin_route.method(tags=['admin'], errors=[NoAdminError])
+@admin_route.method(tags=['admin'], errors=[AuthError])
 async def change_claim_status(claim_id: int = Body(...), status: str = Body(...),
-                              admin: User = Depends(get_current_user)) -> dict:
+                              admin: User = Depends(get_current_user_v2)) -> dict:
     if not admin.is_superuser:
-        raise NoAdminError()
-    try:
-        claim = await Claim.objects.get(Claim.id == claim_id)
-    except:
+        raise AuthError()
+    claim = await Claim.objects.get_or_none(Claim.id == claim_id)
+    if not claim:
         raise HTTPException(status_code=400, detail='Bad Request')
     if status not in {'approved', 'denied'}:
         raise HTTPException(status_code=400, detail='Bad Request')
     await claim.update(status=status)
-    return {'claim': claim.id, 'status': claim.status}
+    if status == 'denied':
+        return {'claim': claim.id, 'status': claim.status}
+    claim_object = await get_object_by_id(claim.claim_type, claim.claim_object_id)
+    await claim_object.delete()
+    return {'claim': claim.id, 'status': claim.status, 'object': 'deleted'}
 
 
-@admin_route.method(tags=['admin'], errors=[NoAdminError])
-async def get_claim_object(claim_id: int = Body(...), admin: User = Depends(get_current_user)) -> dict:
+@admin_route.method(tags=['admin'], errors=[AuthError])
+async def get_claim_object(claim_id: int = Body(...), admin: User = Depends(get_current_user_v2)) -> dict:
     if not admin.is_superuser:
-        raise NoAdminError()
+        raise AuthError()
     try:
         claim = await Claim.objects.get(Claim.id == claim_id)
     except:
@@ -82,13 +83,12 @@ async def get_claim_object(claim_id: int = Body(...), admin: User = Depends(get_
     return claim_object
 
 
-@admin_route.method(tags=['admin'], errors=[NoAdminError])
-async def delete_claim(claim_id: int = Body(...), admin: User = Depends(get_current_user)) -> dict:
+@admin_route.method(tags=['admin'], errors=[AuthError])
+async def delete_claim(claim_id: int = Body(...), admin: User = Depends(get_current_user_v2)) -> dict:
     if not admin.is_superuser:
-        raise NoAdminError()
-    try:
-        claim = await Claim.objects.get(Claim.id == claim_id)
-    except:
+        raise AuthError()
+    claim = await Claim.objects.get_or_none(Claim.id == claim_id)
+    if not claim:
         raise HTTPException(status_code=400, detail='Bad Request')
     await claim.delete()
     return {'claim': claim_id, 'status': 'deleted'}

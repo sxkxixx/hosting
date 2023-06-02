@@ -39,3 +39,6 @@ class NoCommentError(BaseError):
 class NoAdminError(BaseError):
     CODE = -32008
     MESSAGE = 'User is not admin'
+
+
+
