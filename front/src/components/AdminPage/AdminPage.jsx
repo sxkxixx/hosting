@@ -7,6 +7,8 @@ import getAxiosBody from "../sendData";
 import {useNavigate} from "react-router-dom";
 import {ReactComponent as Logo} from "../../img/play.svg";
 
+const url = process.env.REACT_APP_API_URL;
+
 const AdminPage = () => {
     const [commentClaims, setCommentClaims] = useState([]);
     const [videoClaims, setVideoClaims] = useState([]);
@@ -16,7 +18,7 @@ const AdminPage = () => {
     useEffect(() => {
         const body = getAxiosBody('admin_claims');
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/admin', body)
+        instance.post(`${url}/api/v1/admin`, body)
             .then(response => {
                 const data = response.data;
                 if ('error' in data){

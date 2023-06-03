@@ -5,6 +5,8 @@ import axios from "axios";
 import {Link, useNavigate} from "react-router-dom";
 import {ReactComponent as Play} from "../../img/play.svg";
 
+const url = process.env.REACT_APP_API_URL;
+
 const Register = () => {
     document.title = 'Sign Up';
     const navigate = useNavigate();
@@ -73,7 +75,7 @@ const Register = () => {
                   }
             }
             )
-        axios.post('http://127.0.0.1:8000/api/v1/user', data)
+        axios.post(`${url}/api/v1/user`, data)
             .then((response) => {
               navigate('/');
             })

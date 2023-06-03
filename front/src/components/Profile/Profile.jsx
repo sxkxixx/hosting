@@ -7,6 +7,8 @@ import {useEffect, useState} from "react";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 
+const url = process.env.REACT_APP_API_URL;
+
 const Profile =  () => {
     const navigate = useNavigate();
     const [videos, setVideos] = useState([]);
@@ -16,7 +18,7 @@ const Profile =  () => {
     useEffect(() => {
         const body = getAxiosBody('profile');
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/user', body)
+        instance.post(`${url}/api/v1/user`, body)
             .then((response) => {
                 if (response.status === 200) {
                     return response.data
@@ -38,7 +40,7 @@ const Profile =  () => {
         navigate('/');
         const body = getAxiosBody('logout');
         const instance = axios.create({withCredentials: true});
-        await instance.post('http://127.0.0.1:8000/api/v1/user', body);
+        await instance.post(`${url}/api/v1/user`, body);
         localStorage.clear();
     };
 
@@ -51,7 +53,7 @@ const Profile =  () => {
         const formData = new FormData();
         formData.append('avatar', file);
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/upload_avatar', formData)
+        instance.post(`${url}/api/v1/upload_avatar`, formData)
             .then((response) => {
                 const avatar = response.data['avatar'];
                 setAvatar(avatar);

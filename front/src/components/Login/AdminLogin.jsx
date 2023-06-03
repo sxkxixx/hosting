@@ -4,7 +4,7 @@ import getAxiosBody from "../sendData";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 
-
+const url = process.env.REACT_APP_API_URL;
 const AdminLogin = () => {
   document.title = 'Admin LogIn'
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ const AdminLogin = () => {
     const data = getAxiosBody('admin_login',
         {'admin_schema': {'email': email, 'password': password }})
     const instance = axios.create({withCredentials: true})
-    instance.post('http://127.0.0.1:8000/api/v1/admin', data)
+    instance.post(`${url}/api/v1/admin`, data)
         .then(response => {
           navigate('/');
           localStorage.removeItem('admin');

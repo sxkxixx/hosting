@@ -2,6 +2,7 @@ import styles from './UploadVideo.module.css';
 import {useState} from "react";
 import axios from "axios";
 
+const url = process.env.REACT_APP_API_URL;
 
 const UploadVideo = () => {
     const [title, setTitle] = useState('');
@@ -38,7 +39,7 @@ const UploadVideo = () => {
         formData.append('video_file', video);
 
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/upload_video', formData)
+        instance.post(`${url}/api/v1/upload_video`, formData)
             .then(response => {
                 setButtonText('Видео загружено');
                 console.log(response.data)

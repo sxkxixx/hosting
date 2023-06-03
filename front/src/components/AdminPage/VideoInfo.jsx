@@ -3,6 +3,8 @@ import getAxiosBody from "../sendData";
 import axios from "axios";
 import {useState} from "react";
 
+const url = process.env.REACT_APP_API_URL;
+
 const VideoInfo = ({id, video_id, claim_text}) => {
     const [showed, setShowed] = useState(true);
 
@@ -10,9 +12,9 @@ const VideoInfo = ({id, video_id, claim_text}) => {
         event.preventDefault();
         const body = getAxiosBody('change_claim_status', {claim_id: id, status: status})
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/admin', body)
+        instance.post(`${url}/api/v1/admin`, body)
             .then(() => {
-
+                setShowed(false);
             });
     };
 

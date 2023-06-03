@@ -4,6 +4,8 @@ import getAxiosBody from "../sendData";
 import axios from "axios";
 import {useState} from "react";
 
+const url = process.env.REACT_APP_API_URL;
+
 
 const ClaimPopup = ({active, setActive, id, type}) => {
     const [claimText, setClaimText] = useState('');
@@ -21,7 +23,7 @@ const ClaimPopup = ({active, setActive, id, type}) => {
         const instance = axios.create({withCredentials: true});
         const body = getAxiosBody('create_claim', {"claim_schema": {
             "description": claimText, "claim_type": type, "claim_object_id": id}});
-        instance.post('http://127.0.0.1:8000/api/v1/user', body)
+        instance.post(`${url}/api/v1/user`, body)
             .then((response) => {
                 const data = response.data;
                 if ('error' in data) {

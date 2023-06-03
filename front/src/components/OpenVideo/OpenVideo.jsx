@@ -10,6 +10,7 @@ import axios from "axios";
 import VideoPlayer from "../VideoPLayer/VideoPlayer";
 import ClaimPopup from "../ClaimPopup/ClaimPopup";
 
+const url = process.env.REACT_APP_API_URL;
 
 const OpenVideo = () => {
     const [commentText, setCommentText] = useState('');
@@ -28,7 +29,7 @@ const OpenVideo = () => {
     useEffect( () => {
         const body = getAxiosBody('get_video', {'id': Number(id)})
         const instance = axios.create({withCredentials: true})
-        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+        instance.post(`${url}/api/v1/video`, body)
             .then(response => {
                 const data = response.data.result;
                 setUserInfo(data.user);
@@ -45,7 +46,7 @@ const OpenVideo = () => {
     const setRemoveLike = () => {
         const body = getAxiosBody('change_like_status', {'video_id': Number(id)})
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+        instance.post(`${url}/api/v1/video`, body)
             .then((response) => {
                 const data = response.data['result'];
                 if (data['status'] === 'Added') {
@@ -69,7 +70,7 @@ const OpenVideo = () => {
             return;
         const body = getAxiosBody('upload_comment', {comment_data: {video_id: Number(id), comment_text: commentText}})
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+        instance.post(`${url}/api/v1/video`, body)
             .then((response) => {
                 const data = response.data['result'];
                 setComments([...comments, {id: data['comment'], owner: data['user'], text: commentText}])
@@ -84,7 +85,7 @@ const OpenVideo = () => {
     const deleteComment = (comment_id) => {
         const body = getAxiosBody('delete_comment', {comment_id: comment_id});
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+        instance.post(`${url}/api/v1/video`, body)
             .then((response) => {
                 if (response.data['result'].status !== 'deleted')
                     throw new Error();
@@ -116,7 +117,7 @@ const OpenVideo = () => {
     const deleteVideo = () => {
         const body = getAxiosBody('delete_video', {video_id: id});
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/video', body)
+        instance.post(`${url}/api/v1/video`, body)
             .then(response => {
                 const data = response.data;
                 if ('error' in data) {

@@ -7,6 +7,7 @@ import axios from "axios";
 import VideoCard from "../VideoCard/VideoCard";
 import {ReactComponent as UserAvatar} from "../../img/user-logo.svg";
 
+const url = process.env.REACT_APP_API_URL;
 
 const UserPage = () => {
     const {id} = useParams();
@@ -18,7 +19,7 @@ const UserPage = () => {
     useEffect(() => {
         const body = getAxiosBody('get_user_page', {user_id: id})
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/user', body)
+        instance.post(`${url}/api/v1/user`, body)
             .then((response) => {
                 if ('error' in response.data)
                     throw new Error();
@@ -37,7 +38,7 @@ const UserPage = () => {
         event.preventDefault();
         const body = getAxiosBody('set_subscribe', {user_id: id});
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/user', body)
+        instance.post(`${url}/api/v1/user`, body)
             .then((response) => {
                 if ('error' in response.data)
                     throw new Error();
@@ -55,7 +56,7 @@ const UserPage = () => {
         event.preventDefault();
         const body = getAxiosBody('delete_subscribe', {user_id: id});
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/api/v1/user', body)
+        instance.post(`${url}/api/v1/user`, body)
             .then((response) => {
                 if ('error' in response.data)
                     throw new Error();

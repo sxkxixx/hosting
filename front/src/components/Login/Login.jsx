@@ -5,6 +5,8 @@ import axios from "axios";
 import {Link, useNavigate} from "react-router-dom";
 import {ReactComponent as Play} from "../../img/play.svg";
 
+const url = process.env.REACT_APP_API_URL;
+
 const Login = () => {
   document.title = 'Log In'
 
@@ -49,7 +51,7 @@ const Login = () => {
     const data = getAxiosBody('login',
         {'user': {'email': email, 'password': password }})
     const instance = axios.create({withCredentials: true})
-    instance.post('http://127.0.0.1:8000/api/v1/user', data)
+    instance.post(`${url}/api/v1/user`, data)
         .then(response => {
           navigate('/');
           localStorage.removeItem('user');
