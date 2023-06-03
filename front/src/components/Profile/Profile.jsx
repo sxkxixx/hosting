@@ -1,6 +1,6 @@
 import styles from './Profile.module.css';
-import { ReactComponent as UserAvatar } from '../../img/user-avatar.svg';
-import {Link, useNavigate} from 'react-router-dom';
+import { ReactComponent as UserAvatar } from '../../img/user-logo.svg';
+import {useNavigate} from 'react-router-dom';
 import VideoCard from "../VideoCard/VideoCard";
 import UploadVideo from "../UploadVideo/UploadVideo";
 import {useEffect, useState} from "react";
@@ -51,7 +51,7 @@ const Profile =  () => {
         const formData = new FormData();
         formData.append('avatar', file);
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/upload_avatar', formData)
+        instance.post('http://127.0.0.1:8000/api/v1/upload_avatar', formData)
             .then((response) => {
                 const avatar = response.data['avatar'];
                 setAvatar(avatar);

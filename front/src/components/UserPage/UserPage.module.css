@@ -14,6 +14,16 @@
     border-radius: 50%;
 }
 
+.avatar {
+    background-color: #b5b5b5;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .info {
     align-self: center;
 }

@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import {Link, useNavigate} from "react-router-dom";
-
+import {ReactComponent as Play} from "../../img/play.svg";
 
 const Login = () => {
   document.title = 'Log In'
@@ -62,6 +62,7 @@ const Login = () => {
 
   return (
       <div className={styles.container}>
+          <div onClick={() => navigate('/')} style={{cursor: "pointer"}}><Play/></div>
           <form className={styles.form} onSubmit={handleSubmit}>
               <h1 className={styles.title}>Log In</h1>
               <label className={styles.label}>
@@ -71,7 +72,7 @@ const Login = () => {
               </label><br/>
               <label className={styles.label}>
                   Password:
-                  <input className={styles.input} type="password" value={password} onChange={handlePasswordChange} />
+                  <input className={styles.input} type={"password"} value={password} onChange={handlePasswordChange}/>
                   {passwordError && <div style={{ color: 'red' }}>{passwordError}</div>}
               </label><br/>
               <button className={styles.btn} type="submit">Submit</button>

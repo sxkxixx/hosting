@@ -38,7 +38,7 @@ const UploadVideo = () => {
         formData.append('video_file', video);
 
         const instance = axios.create({withCredentials: true});
-        instance.post('http://127.0.0.1:8000/upload_video', formData)
+        instance.post('http://127.0.0.1:8000/api/v1/upload_video', formData)
             .then(response => {
                 setButtonText('Видео загружено');
                 console.log(response.data)

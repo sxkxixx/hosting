@@ -3,6 +3,7 @@ import React, {useState} from 'react';
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import {Link, useNavigate} from "react-router-dom";
+import {ReactComponent as Play} from "../../img/play.svg";
 
 const Register = () => {
     document.title = 'Sign Up';
@@ -89,6 +90,7 @@ const Register = () => {
 
   return (
       <div className={styles.container}>
+          <div onClick={() => navigate('/')} style={{cursor: "pointer"}}><Play/></div>
           <form className={styles.form} onSubmit={handleSubmit}>
               <h1 className={styles.title}>Sign Up</h1>
               <label className={styles.label}>

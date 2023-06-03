@@ -133,47 +133,47 @@ const OpenVideo = () => {
           <div>
               <SearchBar/>
               <div className={styles.main}>
-        <div className={styles.render}>
-            <div className={styles.video_player}>
-                <VideoPlayer id={id} src={videoInfo.url} preview={videoInfo.preview}/>
-            </div>
-          <div className={styles.users_info_and_likes}>
-            <button className={styles.user_profile_icon_render} onClick={() => navigate(`/user/${userInfo.owner_id}`)}>
-                {userInfo.owner_avatar ? <img className={styles.avatar} src={userInfo.owner_avatar}/> : <UserAvatar/>}
-            </button>
-            <p className={styles.user_name}>{userInfo.owner_email}</p>
-              <img className={styles.claim} onClick={() => {
-                  setObjectToClaim(id);
-                  setClaimType('video');
-                  setModalActive(true);
-              }} style={{marginRight: 20}} src={require('../../img/claim.png')} width={20} height={20} alt={"Пожаловаться на видео"}/>
-              {localStorage.getItem('user') === userInfo.owner_email ?
-                  <img className={styles.trashcan}
-                       onClick={deleteVideo}
-                       src={require('../../img/delete.png')} width={20} height={20}/>
-                  : null}
-            <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
-          </div>
-          <div className={styles.description_box} name='description-box'>
-              <div className={styles.container_views__title}>
-                  <p className={styles.title_video}>{videoInfo.title}</p>
-                  <p>Просмотров: {videoInfo.views}</p>
+                  <div className={styles.render}>
+                      <div className={styles.video_player}>
+                          <VideoPlayer id={id} src={videoInfo.url} preview={videoInfo.preview}/>
+                      </div>
+                      <div className={styles.users_info_and_likes}>
+                          <button className={styles.user_profile_icon_render} onClick={() => navigate(`/user/${userInfo.owner_id}`)}>
+                              {userInfo.owner_avatar ? <img className={styles.avatar} src={userInfo.owner_avatar}/> : <UserAvatar/>}
+                          </button>
+                          <p className={styles.user_name}>{userInfo.owner_email}</p>
+                          <img className={styles.claim} onClick={() => {
+                              setObjectToClaim(id);
+                              setClaimType('video');
+                              setModalActive(true);
+                          }} style={{marginRight: 20}} src={require('../../img/claim.png')} width={20} height={20} alt={"Пожаловаться на видео"}/>
+                          {localStorage.getItem('user') === userInfo.owner_email ?
+                              <img className={styles.trashcan}
+                                   onClick={deleteVideo}
+                                   src={require('../../img/delete.png')} width={20} height={20}/>
+                              : null}
+                          <button type="button" className={styles.likes_btn} onClick={setRemoveLike}><Like/>{likes}</button>
+                      </div>
+                      <div className={styles.description_box} name='description-box'>
+                          <div className={styles.container_views__title}>
+                              <p className={styles.title_video}>{videoInfo.title}</p>
+                              <p>Просмотров: {videoInfo.views}</p>
+                          </div>
+                          <p className={styles.description_video}>{videoInfo.description}</p>
+                      </div>
+                  </div>
+                  <div className={styles.comments}>
+                      <p className={styles.comments_title}>Комментарии</p>
+                      <div className={styles.line}></div>
+                      <div className={styles.comments_container}>
+                          {commentList}
+                      </div>
+                      <form className={styles.comment_form} onSubmit={sendComment} action="" method="post">
+                          <input className={styles.comment_input} onChange={handleCommentTextChange} placeholder="Напишите комментарий"/>
+                          <button className={styles.comment_send_btn} type='submit'><Arrow/></button>
+                      </form>
+                  </div>
               </div>
-            <p className={styles.description_video}>{videoInfo.description}</p>
-          </div>
-        </div>
-          <div className={styles.comments} name='comments'>
-            <p className={styles.comments_title}>Комментарии</p>
-            <div className={styles.line}></div>
-            <div className={styles.comments_container}>
-              {commentList}
-            </div>
-            <form className={styles.comment_form} onSubmit={sendComment} action="" method="post">
-              <input className={styles.comment_input} onChange={handleCommentTextChange} placeholder="Напишите комментарий"/>
-              <button className={styles.comment_send_btn} type='submit'><Arrow/></button>
-            </form>
-          </div>
-      </div>
             </div>
           <ClaimPopup active={modalActive} setActive={setModalActive} id={objectToClaim} type={claimType}/>
       </div>

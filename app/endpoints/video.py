@@ -35,7 +35,7 @@ async def main_page(user: User = Depends(get_current_user_v2)) -> dict:
         logging.error(f'{e}')
 
 
-@video_router.post('/upload_video', tags=['video'])
+@video_router.post('/api/v1/upload_video', tags=['video'])
 async def upload_video(user: User = Depends(get_current_user_v2), title: str = Form(...),
                        description: str = Form(...),
                        video_file: UploadFile = File(...),

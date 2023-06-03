@@ -5,6 +5,7 @@ import getAxiosBody from "../sendData";
 import styles from './UserPage.module.css';
 import axios from "axios";
 import VideoCard from "../VideoCard/VideoCard";
+import {ReactComponent as UserAvatar} from "../../img/user-logo.svg";
 
 
 const UserPage = () => {
@@ -72,7 +73,7 @@ const UserPage = () => {
         <div>
             <SearchBar/>
             <div className={styles.header}>
-                <img src={userInfo.avatar} className={styles.avatar} />
+                {userInfo.avatar ? <img src={userInfo.avatar} className={styles.avatar}/> : <div className={styles.avatar}><UserAvatar/></div>}
                 <div className={styles.info}>
                     <p className={styles.info__text}>{userInfo.email}</p>
                     <p className={styles.info__text}>{userInfo.username}</p>

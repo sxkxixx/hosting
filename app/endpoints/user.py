@@ -130,7 +130,7 @@ async def delete_user(user: User = Depends(get_current_user_v2)) -> str:
     return 'deleted'
 
 
-@user_route.post(tags=['user'], path='/upload_avatar')
+@user_route.post(tags=['user'], path='/api/v1/upload_avatar')
 async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get_current_user_v2)):
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
