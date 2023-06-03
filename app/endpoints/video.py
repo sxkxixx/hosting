@@ -6,31 +6,31 @@ from core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataEr
 from utils.auth import get_current_user_v2, get_unique_name
 from utils.s3_client import upload_file
 from core.schemas import CommentUploadSchema
+from redis_client import redis_client
+import json
 import logging
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])
 async def main_page(user: User = Depends(get_current_user_v2)) -> dict:
+    videos = await redis_client.get('main_page__videos')
+    if videos:
+        return json.loads(videos)
     try:
         videos = sorted(await Video.objects.select_related('user_views').all(), key=lambda x: len(x.user_views), reverse=True)
         logging.info(f'Main Page')
-        return {
-            'user': user.email if user else None,
-            'videos': [{
-                'id': video.id,
-                'title': video.title,
-                'preview': await video.preview_url(),
-                'views': await video.views_amount(),
-                'owner': {
-                    'id': video.owner.id,
-                    'email': (await User.objects.get(User.id == video.owner.id)).email,
-                    'avatar': await (await User.objects.get(User.id == video.owner.id)).avatar_url()
-                }
-            } for video in videos]
-        }
+        context = {'user': user.email if user else None, 'videos': []}
+        for video in videos:
+            owner = await User.objects.get(User.id == video.owner.id)
+            context['videos'].append(
+                {'id': video.id, 'title': video.title, 'preview': await video.preview_url(),
+                 'views': await video.views_amount(), 'owner': {'id': owner.id, 'email': owner.email, 'avatar': await owner.avatar_url()}}
+            )
+        await redis_client.set('main_page__videos', json.dumps(context))
+        return context
     except Exception as e:
         logging.error(f'{e}')
 
@@ -57,9 +57,9 @@ async def upload_video(user: User = Depends(get_current_user_v2), title: str = F
             owner=user, video_cloud_name=cloud_video_name, preview_cloud_name=preview_cloud_name
         )
         await video.save()
-        url = await video.video_url()
         logging.info(f'Upload Video: Video {video.id} successfully uploaded')
-        return {'status': 200, 'url': f'{url}'}
+        await redis_client.delete('main_page__videos')
+        return {'status': 'uploaded'}
     except Exception as e:
         logging.error(f'Upload Video: Something went wrong {e}')
         HTTPException(status_code=400, detail='e')

@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from core.config import POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_HOST, POSTGRES_DB, POSTGRES_PORT, ADMIN_EMAIL, ADMIN_USERNAME, ADMIN_PASSWORD
 from utils.s3_client import get_url, delete_object
 
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 DATABASE_URL = f'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}'
 database = databases.Database(DATABASE_URL)
 metadata = sqlalchemy.MetaData()

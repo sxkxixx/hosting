@@ -11,7 +11,7 @@ from utils.utils import get_user_videos
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'], errors=[UserExistsError, WrongDataError])

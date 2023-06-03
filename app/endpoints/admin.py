@@ -9,7 +9,7 @@ from core.models import User, Claim, Comment
 from core.exceptions import AuthError, NoUserError, NoAdminError, WrongDataError
 
 admin_route = jsonrpc.Entrypoint(path='/api/v1/admin')
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @admin_route.method(tags=['admin'], errors=[NoUserError, NoAdminError, WrongDataError])
