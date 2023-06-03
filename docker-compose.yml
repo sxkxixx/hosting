@@ -1,0 +1,53 @@
+version: "3.8"
+
+services:
+  app:
+    restart: always
+    build: ./app
+    command: gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file: .env.prod
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - db-back
+      - back-front
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=sxkxixx
+      - POSTGRES_PASSWORD=sxkxixx
+      - POSTGRES_DB=videohosting
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "sxkxixx", "-d", "videohosting"]
+      interval: 5s
+      retries: 15
+    networks:
+      - db-back
+
+  front:
+    build:
+      context: ./front
+      args:
+        REACT_APP_API_URL: http://localhost:80
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      back-front:
+
+
+networks:
+  db-back:
+  back-front:
+
+volumes:
+  data:

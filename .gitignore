@@ -5,7 +5,6 @@ Readme.md
 database.db
 .env
 .env.prod
-docker-compose.yml
 front/node_modules
 **/__pycache__
 app/logs.log
