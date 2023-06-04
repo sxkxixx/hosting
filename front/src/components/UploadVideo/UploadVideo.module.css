@@ -89,5 +89,12 @@
 	background-color: #2B5279;
     color: white;
     font-size: 16px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #fff;
+    color:#2B5279;
+    border: 2px solid #2B5279;
 }
 

@@ -54,7 +54,7 @@ const UploadVideo = () => {
 
     }
 
-    return <form className={styles.upload_video_form} method="post" onSubmit={handleSubmit}>
+    return (<form className={styles.upload_video_form} method="post" onSubmit={handleSubmit}>
         <textarea className={`${styles.upload_textarea} ${styles.upload_title_textarea}`} onChange={handleTitleChange} placeholder="Введите название"/>
         <textarea className={`${styles.upload_textarea} ${styles.upload_description_textarea}`} onChange={handleDescriptionChange} placeholder="Введите описание"
         cols="10" rows="5"/>
@@ -69,7 +69,7 @@ const UploadVideo = () => {
             </label>
         </div>
         <button className={styles.btn} type="submit">{buttonText}</button>
-    </form>;
+    </form>)
 };
 
 export default UploadVideo;

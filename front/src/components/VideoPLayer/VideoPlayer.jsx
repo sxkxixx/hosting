@@ -7,7 +7,7 @@ import '../../../node_modules/video-react/dist/video-react.css';
 
 const VideoPlayer = ({id ,src, preview}) => {
     return (
-        <Player src={src} poster={preview} fluid={false} height={600} width={"95%"}>
+        <Player src={src} poster={preview} fluid={false} height={600} width={"100%"}>
             <BigPlayButton position="center"/>
             <ControlBar autoHide={true}>
                 <PlayToggle/>

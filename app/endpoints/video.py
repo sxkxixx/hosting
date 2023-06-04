@@ -9,7 +9,7 @@ from core.schemas import CommentUploadSchema
 import logging
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @video_router.method(tags=['video'])

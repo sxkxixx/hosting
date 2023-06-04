@@ -43,4 +43,4 @@ async def shutdown() -> None:
 
 engine = sqlalchemy.create_engine(DATABASE_URL)
 metadata.create_all(engine)
-asyncio.run(with_connect(create_roles))
+# asyncio.run(with_connect(create_roles))

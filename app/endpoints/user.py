@@ -11,18 +11,15 @@ from utils.utils import get_user_videos
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
-logging.basicConfig(filename='app/logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'], errors=[UserExistsError, WrongDataError])
 async def register(user: UserRegister) -> dict:
     email, username, password, password_repeat = user.email.lower(), user.username.lower(), user.password, user.password_repeat
-    try:
-        user_by_data = await User.objects.filter((User.email == email) | (User.username == username)).get()
-        logging.warning(f'Register: User {user_by_data.email} already exist')
+    user_by_data = await User.objects.filter((User.email == email) | (User.username == username)).all()
+    if user_by_data:
         raise UserExistsError()
-    except:
-        user_by_data = None
     if user_by_data or password != password_repeat:
         logging.warning(f'Register: Bad try to register a user')
         raise WrongDataError()
