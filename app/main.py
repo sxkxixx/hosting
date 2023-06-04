@@ -1,4 +1,6 @@
 import sqlalchemy
+
+from core.config import CORS_HOST
 from core.models import database, DATABASE_URL, metadata, create_roles, with_connect
 from endpoints.user import user_route
 from endpoints.video import video_router
@@ -20,7 +22,7 @@ app.bind_entrypoint(admin_route)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:3000', 'http://127.0.0.1:3000', 'http://127.0.0.1'],
+    allow_origins=[CORS_HOST],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*']

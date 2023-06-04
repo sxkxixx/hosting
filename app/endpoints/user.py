@@ -53,10 +53,10 @@ async def login(response: Response, user: UserSchema) -> dict:
             data = {'sub': email}
             access_token = Hasher.get_encode_token(data,)
             refresh_token = Hasher.get_encode_token(data, datetime.timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES))
-            response.set_cookie(key='access_token', value=access_token, httponly=True,
-                                expires=ACCESS_TOKEN_EXPIRE_MINUTES, samesite='none', secure=True)
-            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
-                                expires=REFRESH_TOKEN_EXPIRE_MINUTES, samesite='none', secure=True)
+            response.set_cookie(key='access_token', value=access_token, httponly=True, samesite='none', secure=True,
+                                expires=ACCESS_TOKEN_EXPIRE_MINUTES)
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, samesite='none', secure=True,
+                                expires=REFRESH_TOKEN_EXPIRE_MINUTES)
             logging.info(f'Login: Successfully login {user.email}')
             return {'user': user.email, 'status': 'Authorized'}
         logging.warning(f'Login: Incorrect password for {user.email}')
