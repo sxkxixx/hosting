@@ -6,7 +6,7 @@ from core.models import User, Video, Role, Claim, Subscription, View
 from core.schemas import UserRegister, UserSchema, ClaimSchema
 from core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthError
 import fastapi_jsonrpc as jsonrpc
-from utils.s3_client import upload_file
+from utils.s3_client import upload_file, delete_object
 from utils.utils import get_user_videos
 import logging
 
@@ -141,6 +141,8 @@ async def delete_user(user: User = Depends(get_current_user_v2)) -> str:
 async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get_current_user_v2)):
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
+    if user.avatar:
+        await delete_object(user.avatar)
     unique_avatar_name = AVATARS_DIR + get_unique_name(avatar.filename)
     result = await upload_file(avatar, unique_avatar_name)
     if not result:

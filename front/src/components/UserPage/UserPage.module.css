@@ -5,6 +5,7 @@
     gap: 50px;
     padding: 0 100px;
     margin-bottom: 40px;
+    flex-direction: row;
 }
 
 .avatar {
@@ -31,7 +32,6 @@
 .info__text {
     font-size: 24px;
     margin: 0;
-    text-decoration: underline;
 }
 
 .info__text:first-child {
@@ -56,12 +56,12 @@
 }
 
 .main__videos {
-    padding: 0 100px;
+    padding: 0;
     display: flex;
     gap: 20px;
     flex-direction: row;
     flex-wrap: wrap;
-    width: 85%;
+    width: 100%;
     margin-bottom: 40px;
 }
 
