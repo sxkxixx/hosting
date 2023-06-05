@@ -2,7 +2,7 @@ import datetime
 from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
 from utils.auth import Hasher, get_unique_name, get_current_user_v2
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, AVATARS_DIR
-from core.models import User, Video, Role, Claim, Subscription
+from core.models import User, Video, Role, Claim, Subscription, View
 from core.schemas import UserRegister, UserSchema, ClaimSchema
 from core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthError
 import fastapi_jsonrpc as jsonrpc
@@ -15,7 +15,7 @@ logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'], errors=[UserExistsError, WrongDataError])
-async def register(user: UserRegister) -> dict:
+async def register(user: UserRegister, response: Response) -> dict:
     email, username, password, password_repeat = user.email.lower(), user.username.lower(), user.password, user.password_repeat
     user_by_data = await User.objects.filter((User.email == email) | (User.username == username)).all()
     if user_by_data:
@@ -33,6 +33,13 @@ async def register(user: UserRegister) -> dict:
         )
         await user.save()
         logging.info(f'User {user.email} created')
+        data = {'sub': user.email}
+        access_token = Hasher.get_encode_token(data)
+        refresh_token = Hasher.get_encode_token(data, REFRESH_TOKEN_EXPIRE_MINUTES)
+        response.set_cookie(key='access_token', value=access_token, httponly=True, samesite='none', secure=True,
+                                expires=ACCESS_TOKEN_EXPIRE_MINUTES)
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, samesite='none', secure=True,
+                                expires=REFRESH_TOKEN_EXPIRE_MINUTES)
         return {'detail': 'Пользователь {} успешно создан'.format(user.email)}
     except Exception as e:
         logging.error(f'Register: {e}')
@@ -49,9 +56,9 @@ async def login(response: Response, user: UserSchema) -> dict:
         raise NoUserError()
     try:
         if Hasher.verify_password(password, user.hashed_password):
-            data = {'sub': email}
+            data = {'sub': user.email}
             access_token = Hasher.get_encode_token(data,)
-            refresh_token = Hasher.get_encode_token(data, datetime.timedelta(seconds=REFRESH_TOKEN_EXPIRE_MINUTES))
+            refresh_token = Hasher.get_encode_token(data, REFRESH_TOKEN_EXPIRE_MINUTES)
             response.set_cookie(key='access_token', value=access_token, httponly=True, samesite='none', secure=True,
                                 expires=ACCESS_TOKEN_EXPIRE_MINUTES)
             response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, samesite='none', secure=True,
@@ -80,11 +87,13 @@ async def profile(user: User = Depends(get_current_user_v2)) -> dict:
         logging.warning(f'Profile: No user')
         raise AuthError()
     videos = await Video.objects.filter(user.id == Video.owner.id).all()
+    viewed_videos = await Video.objects.select_related('user_views').exclude(owner=user).filter(user_views__user=user).all()
     context = {
         'avatar': await user.avatar_url(),
         'username': user.username,
         'email': user.email,
-        'videos': [{'id': video.id, 'title': video.title, 'preview': await video.preview_url()} for video in videos]
+        'videos': [{'id': video.id, 'title': video.title, 'preview': await video.preview_url()} for video in videos],
+        'viewed_videos': [{'id': video.id, 'title': video.title, 'owner': (await User.objects.get(User.id == video.owner.id)).email, 'preview': await video.preview_url()} for video in viewed_videos]
     }
     return context
 

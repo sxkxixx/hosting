@@ -43,8 +43,10 @@ async def upload_video(user: User = Depends(get_current_user_v2), title: str = F
     if not user:
         logging.warning(f'Upload Video: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
+    if 'video' not in video_file.content_type:
+        raise HTTPException(status_code=404, detail='Bad request')
     try:
-        cloud_video_name = 'videos/' + get_unique_name(filename=video_file.filename)
+        cloud_video_name = 'videos/' + get_unique_name(video_file.filename)
         result = await upload_file(video_file, cloud_video_name)
         if not result:
             raise HTTPException(status_code=400, detail='Bad Request')
@@ -129,7 +131,9 @@ async def get_video(id: int, user: User = Depends(get_current_user_v2)) -> dict:
         logging.warning(f'Get Video: No Video {id}')
         raise NoVideoError()
     if user:
-        await View.objects.create(video=id, user=user.id)
+        view = await View.objects.get_or_none(video=id, user=user)
+        if not view:
+            await View.objects.create(video=id, user=user.id)
     try:
         logging.info(f'Get Video: Video({id}) data returned')
         comments = await video.video_comments.all()

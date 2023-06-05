@@ -14,6 +14,8 @@ const Profile =  () => {
     const [videos, setVideos] = useState([]);
     const [user, setUser] = useState({});
     const [avatar, setAvatar] = useState('');
+    const [viewedVideos, setViewedVideos] = useState([]);
+    const [isViewedVideos, setIsViewedVideos] = useState(false);
 
     useEffect(() => {
         const body = getAxiosBody('profile');
@@ -29,6 +31,7 @@ const Profile =  () => {
                 setVideos(data['result']['videos'])
                 setUser({'username': data['result'].username, 'email': data['result'].email});
                 setAvatar(data['result'].avatar);
+                setViewedVideos(data.result.viewed_videos);
                 document.title = data['result'].email;
             })
             .catch((err) => {
@@ -63,6 +66,9 @@ const Profile =  () => {
             });
     };
 
+    const videosList = videos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email} isUsersPage={true}/>);
+    const viewedVideosList = viewedVideos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview} owner={video.owner}/>);
+
     return (
         <div className={styles.main_container_profile}>
             <div className={styles.container_left}>
@@ -78,12 +84,23 @@ const Profile =  () => {
                         <p className={styles.user_email}>Email: {user.email}</p>
                     </div>
                 </div>
-                <h3 className=''>Мои видео:</h3>
+                <div className={styles.filter_btn__container}>
+                    <h3 className={`${styles.filter_btn} ${styles.active}`} id="videos" onClick={() => {
+                        setIsViewedVideos(false);
+                        document.getElementById('videos').classList.add(styles.active);
+                        document.getElementById('viewed_videos').classList.remove(styles.active);
+
+                    }}>Мои видео</h3>
+                    <h3 className={styles.filter_btn} id="viewed_videos" onClick={() => {
+                        setIsViewedVideos(true);
+                        document.getElementById('videos').classList.remove(styles.active);
+                        document.getElementById('viewed_videos').classList.add(styles.active);
+                    }}>Просмотренные видео</h3>
+                </div>
                 <div className={styles.videos_container}>
-                    { videos.map((video) => <VideoCard id={video.id} title={video.title} preview={video.preview} owner={user.email} isUsersPage={true}/>) }
+                    {isViewedVideos ?  viewedVideosList : videosList}
                 </div>
             </div>
-
             <div className={styles.container_right}>
                 <div className={styles.button_container}>
                     <button className={`${styles.back_to_search} ${styles.btn}`} type='button'

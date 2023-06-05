@@ -42,16 +42,13 @@ const UploadVideo = () => {
         instance.post(`${url}/api/v1/upload_video`, formData)
             .then(response => {
                 setButtonText('Видео загружено');
-                console.log(response.data)
+                setTimeout(() => window.location.reload(), 1500);
             })
             .catch(err => {
-                setButtonText('Произошла ошибка во время загрузки')
-            })
-            .finally(() => {
-                clearFields(event)
-                setTimeout(() => setButtonText('Загрузите видео'), 2000);
+                setButtonText('Произошла ошибка во время загрузки');
+                clearFields(event);
+                setTimeout(() => setButtonText('Загрузить'), 1500);
             });
-
     }
 
     return (<form className={styles.upload_video_form} method="post" onSubmit={handleSubmit}>

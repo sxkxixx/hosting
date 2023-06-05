@@ -1,9 +1,11 @@
+import celery
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from core.config import SMTP_EMAIL, SMTP_PASSWORD, SMTP_SERVER
 import logging
 
+celery_app = celery.Celery('tasks', broker='redis://localhost:6379')
 logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
@@ -17,6 +19,7 @@ def template(email):
     </html>"""
 
 
+@celery_app.task()
 def send_message(to_address: list | str = None):
     try:
         server = smtplib.SMTP_SSL(SMTP_SERVER, 465)

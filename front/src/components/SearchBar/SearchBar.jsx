@@ -13,10 +13,6 @@ const SearchBar = () => {
 
 
   useEffect(() => {
-      if (localStorage.getItem('user') !== null) {
-          setIsAuth(true);
-          return;
-      }
       const body = getAxiosBody('current_user');
           const instance = axios.create({withCredentials: true});
           instance.post('http://127.0.0.1:8000/api/v1/user', body)

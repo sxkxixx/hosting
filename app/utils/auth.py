@@ -19,10 +19,11 @@ class Hasher:
         return pwd_context.verify(plain_password, hash_password)
 
     @staticmethod
-    def get_encode_token(data: dict, expires_in: datetime.timedelta | None = None):
+    def get_encode_token(data: dict, expires_in: int | None = None):
         to_encode_data = data.copy()
         if not expires_in:
-            expires_in = datetime.timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            expires_in = ACCESS_TOKEN_EXPIRE_MINUTES
+        expires_in = datetime.timedelta(minutes=expires_in)
         to_encode_data.update({'expire': str(datetime.datetime.utcnow() + expires_in)})
         token = jwt.encode(to_encode_data, key=SECRET_KEY, algorithm=ALGORITHM)
         return token
@@ -38,7 +39,7 @@ class Hasher:
 def update_token(response: Response, data: dict, token_type: str, expire: int):
     response.delete_cookie(token_type)
     token = Hasher.get_encode_token(data)
-    response.set_cookie(key=token_type, value=token, httponly=True, expires=expire)
+    response.set_cookie(key=token_type, value=token, httponly=True, expires=expire, samesite='none', secure=True)
 
 
 async def get_user_by_token(token):
