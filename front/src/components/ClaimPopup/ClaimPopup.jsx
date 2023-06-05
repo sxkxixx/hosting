@@ -31,12 +31,17 @@ const ClaimPopup = ({active, setActive, id, type}) => {
                 }
                 setException('');
                 setMsg('Жалоба отправлена');
+                setClaimText('');
+                setTimeout(() => {
+                    setActive(false);
+                    setMsg('');
+                    setException('');
+                }, 1500);
             })
             .catch((err) => {
-                setException('Жалоба не отправлена')
+                setException('Жалоба не отправлена');
                 setMsg('');
-            })
-
+            });
     }
 
     const closePopup = () => {

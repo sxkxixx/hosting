@@ -130,9 +130,8 @@ class View(ormar.Model):
         tablename = 'views'
 
     id: int = ormar.Integer(primary_key=True)
-    user: User = ormar.ForeignKey(User, related_name='viewed_videos', nullable=True, ondelete="SET NULL")
-    # TODO video: Переделать на ondelete="CASCADE"
-    video: Video = ormar.ForeignKey(Video, related_name='user_views', nullable=True, ondelete="SET NULL")
+    user: User = ormar.ForeignKey(User, related_name='viewed_videos', nullable=True, ondelete="CASCADE")
+    video: Video = ormar.ForeignKey(Video, related_name='user_views', nullable=True, ondelete="CASCADE")
 
 
 class Claim(ormar.Model):
@@ -140,14 +139,12 @@ class Claim(ormar.Model):
         tablename = 'claims'
 
     CLAIMS_OBJECTS = ['comment', 'video', 'user']
-    CLAIM_STATUSES = ['sent', 'approved', 'denied']
 
     id: int = ormar.Integer(primary_key=True)
     description: str = ormar.String(max_length=200, nullable=False)
     claim_type: str = ormar.String(max_length=15, choices=CLAIMS_OBJECTS)
     owner: User = ormar.ForeignKey(User, related_name='user_claims', ondelete='CASCADE')
     claim_object_id: int = ormar.Integer()
-    status: str = ormar.String(max_length=15, choices=CLAIM_STATUSES, default='sent')
 
 
 class Subscription(ormar.Model):

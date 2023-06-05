@@ -44,9 +44,8 @@ async def login(response: Response, user: UserSchema) -> dict:
     email, password = user.email.lower(), user.password
     if not (email and password):
         raise WrongDataError()
-    try:
-        user = await User.objects.get(User.email == email)
-    except:
+    user = await User.objects.get_or_none(User.email == email)
+    if not user:
         raise NoUserError()
     try:
         if Hasher.verify_password(password, user.hashed_password):
@@ -142,17 +141,19 @@ async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get
 
 
 @user_route.method(tags=['user'], errors=[NoUserError])
-async def get_user_page(user_id: int, current_user: User = Depends(get_current_user_v2)) -> dict:
-    user = await User.objects.get_or_none(User.id == user_id)
-    if not user:
+async def get_user_page(user_id: int, user: User = Depends(get_current_user_v2)) -> dict:
+    requested_user = await User.objects.get_or_none(User.id == user_id)
+    if not requested_user:
         raise NoUserError()
-    subscribed = await Subscription.objects.get_or_none((Subscription.user.id == current_user.id) & (Subscription.aim_user.id == user_id))
+    subscribed = False
+    if user:
+        subscribed = await Subscription.objects.get_or_none((Subscription.user.id == user.id) & (Subscription.aim_user.id == user_id))
     return {
         'user': {
-            'id': user.id,
-            'email': user.email,
-            'username': user.username,
-            'avatar': await user.avatar_url()
+            'id': requested_user.id,
+            'email': requested_user.email,
+            'username': requested_user.username,
+            'avatar': await requested_user.avatar_url()
         },
         'videos': await get_user_videos(user_id),
         'subscribed': bool(subscribed)

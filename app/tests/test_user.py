@@ -15,12 +15,9 @@ async def test_register_method():
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(url('user'), json=query_params_register)
-            response_delete = await async_client.post(url('user'), json=query_params_delete)
     assert response.status_code == 200
     assert response.json()['result'] == {'detail': f'Пользователь {email} успешно создан'}
 
-    assert response_delete.status_code == 200
-    assert response_delete.json()['result'] == 'deleted'
 
 
 @pytest.mark.asyncio
@@ -47,8 +44,8 @@ async def test_register_method_user_exists():
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(url('user'), json=query)
 
-    assert response.status_code == 400
-    assert response.json()['detail'] == 'Bad Request'
+    assert response.status_code == 200
+    assert response.json()['error']['code'] == -32001
 
 
 @pytest.mark.asyncio
@@ -60,8 +57,8 @@ async def test_register_method_wrong_passwords():
         async with AsyncClient(app=app) as async_client:
             response = await async_client.post(url('user'), json=query)
 
-    assert response.status_code == 400
-    assert response.json()['detail'] == 'Bad Request'
+    assert response.status_code == 200
+    assert response.json()['error']['code'] == -32005
 
 
 @pytest.mark.asyncio
@@ -73,13 +70,13 @@ async def test_register_login_method():
     query_params_login = get_query_params(method='login', body={'user': {
         'email': email, 'password': password
     }})
-    query_params_delete = get_query_params(method='delete_user', body={"email": email})
+    query_params_delete = get_query_params(method='delete_user', body={})
 
     async with LifespanManager(app):
         async with AsyncClient(app=app) as async_client:
             response_register = await async_client.post(url('user'), json=query_params_register)
             response_login = await async_client.post(url('user'), json=query_params_login)
-            response_delete = await async_client.post(url('user'), json=query_params_delete)
+            response_delete = await async_client.post(url('user'), json=query_params_delete, cookies=response_login.cookies)
 
     assert response_register.status_code == 200
     assert response_register.json()['result'] == {'detail': f'Пользователь {email} успешно создан'}

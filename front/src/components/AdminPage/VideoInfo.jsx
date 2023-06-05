@@ -15,6 +15,7 @@ const VideoInfo = ({id, video_id, claim_text}) => {
         instance.post(`${url}/api/v1/admin`, body)
             .then(() => {
                 setShowed(false);
+                window.location.reload();
             });
     };
 

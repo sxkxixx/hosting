@@ -14,6 +14,7 @@ const CommentInfo = ({id, comment, claim_text}) => {
         instance.post(`${url}/api/v1/admin`, body)
             .then(() => {
                 setShowed(false);
+                window.location.reload();
             })
             .catch(err => {
 

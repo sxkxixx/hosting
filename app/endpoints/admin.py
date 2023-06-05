@@ -41,33 +41,36 @@ async def admin_claims(admin: User = Depends(get_current_user_v2)) -> dict:
         comment_claims = [
             {'id': claim.id, 'comment': (await Comment.objects.get(Comment.id == claim.claim_object_id)).comment_text,
              'claim': claim.description}
-            for claim in await Claim.objects.filter((Claim.status == 'sent') & (Claim.claim_type == 'comment')).all()
+            for claim in await Claim.objects.filter((Claim.claim_type == 'comment')).all()
         ]
         video_claims = [
             {'id': claim.id, 'video_id': claim.claim_object_id, 'claim': claim.description} for claim in
-            await Claim.objects.filter((Claim.status == 'sent') & (Claim.claim_type == 'video')).all()
+            await Claim.objects.filter((Claim.claim_type == 'video')).all()
         ]
-
         return {'comment_claims': comment_claims, 'video_claims': video_claims}
     except Exception as e:
         print(e)
 
 
-@admin_route.method(tags=['admin'], errors=[AuthError])
+@admin_route.method(tags=['admin'], errors=[AuthError, WrongDataError])
 async def change_claim_status(claim_id: int = Body(...), status: str = Body(...),
                               admin: User = Depends(get_current_user_v2)) -> dict:
     if not admin.is_superuser:
         raise AuthError()
     claim = await Claim.objects.get_or_none(Claim.id == claim_id)
     if not claim:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise WrongDataError()
     if status not in {'approved', 'denied'}:
-        raise HTTPException(status_code=400, detail='Bad Request')
+        raise WrongDataError()
     await claim.update(status=status)
     if status == 'denied':
+        await claim.delete()
         return {'claim': claim.id, 'status': claim.status}
     claim_object = await get_object_by_id(claim.claim_type, claim.claim_object_id)
     await claim_object.delete()
+    same_object_claims = await Claim.objects.filter((Claim.claim_type == claim.claim_type) & (Claim.claim_object_id == claim.claim_object_id)).all()
+    for claim in same_object_claims:
+        await claim.delete()
     return {'claim': claim.id, 'status': claim.status, 'object': 'deleted'}
 
 

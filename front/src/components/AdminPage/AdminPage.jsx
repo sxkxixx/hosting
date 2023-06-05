@@ -32,6 +32,7 @@ const AdminPage = () => {
             })
     }, [])
 
+    const emptyDiv = <div style={{fontSize: 22}}>Жалоб пока нет, админ может отдыхать)))</div>;
     const commentCards = commentClaims.map((claim) => (<CommentInfo id={claim.id} comment={claim.comment} claim_text={claim.claim}/>))
     const videoCards = videoClaims.map((claim) => (<VideoInfo id={claim.id} claim_text={claim.claim} video_id={claim.video_id}/>))
 
@@ -49,7 +50,7 @@ const AdminPage = () => {
             </div>
             <div className={styles.main}>
                 <div className={styles.cards}>
-                    {isCommentClaims ? commentCards : videoCards}
+                    {isCommentClaims ? (commentCards.length ? commentCards : emptyDiv) : (videoCards.length ? videoCards : emptyDiv)}
                 </div>
             </div>
         </div>
