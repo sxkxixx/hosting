@@ -1,20 +1,17 @@
 .upload_video_form {
     display: flex;
-    flex-direction: column;
-    gap: 28px;
+    flex-wrap: wrap;
     border: 1px solid #9C9C9C;
     border-radius: 16px;
-    height: 700px;
+    height: 600px;
     width: 100%;
     padding: 0;
     justify-content: center;
-    align-items: center;
 }
 
 .container {
     display: flex;
-    flex-direction: row;
-    padding-left: 20px;
+    flex-direction: column;
     justify-content: center;
     gap: 8px;
 }
@@ -40,7 +37,7 @@
 }
 
 .upload_description_textarea {
-    height: 360px;
+    height: 260px;
     resize: none;
 }
 
@@ -81,7 +78,6 @@
 
 .btn {
     width: 280px;
-    margin-left: 20px;
     height: 30px;
     padding: 8px 16px;
     border-radius: 8px;
@@ -90,6 +86,7 @@
     color: white;
     font-size: 16px;
     cursor: pointer;
+    margin-top: 20px;
 }
 
 .btn:hover {

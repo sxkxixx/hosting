@@ -7,6 +7,8 @@ import {useEffect, useState} from "react";
 import axios from "axios";
 import getAxiosBody from "../sendData";
 
+const url = process.env.REACT_APP_API_URL;
+
 const SearchBar = () => {
   const navigate = useNavigate();
   const [isAuth, setIsAuth] = useState(false);
@@ -15,7 +17,7 @@ const SearchBar = () => {
   useEffect(() => {
       const body = getAxiosBody('current_user');
           const instance = axios.create({withCredentials: true});
-          instance.post('http://127.0.0.1:8000/api/v1/user', body)
+          instance.post(`${url}/api/v1/user`, body)
               .then((response) => {
                   setIsAuth(true);
                   localStorage.setItem('user', response.data['result'].email);
