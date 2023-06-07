@@ -49,6 +49,8 @@ async def upload_video(user: User = Depends(get_current_user_v2), title: str = F
         raise HTTPException(status_code=404, detail='Bad file type')
     if not is_valid_signature(file_type='video', file=video_file) or not is_valid_signature(file_type='image', file=preview_file):
         raise HTTPException(status_code=404, detail='Bad file type')
+    video_file.file.seek(0)
+    preview_file.file.seek(0)
     try:
         cloud_video_name = 'videos/' + get_unique_name(video_file.filename)
         result = await upload_file(video_file, cloud_video_name)
