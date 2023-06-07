@@ -1,5 +1,4 @@
-from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
-from core.celery.tasks import send_message
+from fastapi import Depends, Response, HTTPException, Body, UploadFile, File, BackgroundTasks
 from utils.auth import Hasher, get_unique_name, get_current_user_v2
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, AVATARS_DIR
 from core.models import User, Video, Role, Claim, Subscription
@@ -8,6 +7,7 @@ from core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthEr
 import fastapi_jsonrpc as jsonrpc
 from utils.s3_client import upload_file, delete_object
 from utils.utils import get_user_videos, is_valid_signature
+from utils.smtp_task import send_message
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
@@ -15,7 +15,7 @@ logging.basicConfig(filename='logs.log', level=logging.INFO)
 
 
 @user_route.method(tags=['user'], errors=[UserExistsError, WrongDataError])
-async def register(user: UserRegister, response: Response) -> dict:
+async def register(user: UserRegister, response: Response, background_task: BackgroundTasks) -> dict:
     email, username, password, password_repeat = user.email.lower(), user.username.lower(), user.password, user.password_repeat
     user_by_data = await User.objects.filter((User.email == email) | (User.username == username)).all()
     if user_by_data:
@@ -36,11 +36,11 @@ async def register(user: UserRegister, response: Response) -> dict:
         data = {'sub': user.email}
         access_token = Hasher.get_encode_token(data)
         refresh_token = Hasher.get_encode_token(data, REFRESH_TOKEN_EXPIRE_MINUTES)
-        response.set_cookie(key='access_token', value=access_token, httponly=True, samesite='none', secure=True,
+        response.set_cookie(key='access_token', value=access_token, httponly=True,
                                 expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, samesite='none', secure=True,
+        response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
                                 expires=REFRESH_TOKEN_EXPIRE_MINUTES)
-        send_message.delay(user.email)
+        background_task.add_task(send_message, user.email)
         return {'detail': 'Пользователь {} успешно создан'.format(user.email)}
     except Exception as e:
         logging.error(f'Register: {e}')
