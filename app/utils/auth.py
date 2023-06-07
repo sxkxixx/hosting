@@ -39,7 +39,7 @@ class Hasher:
 def update_token(response: Response, data: dict, token_type: str, expire: int):
     response.delete_cookie(token_type)
     token = Hasher.get_encode_token(data)
-    response.set_cookie(key=token_type, value=token, httponly=True, expires=expire, samesite='none', secure=True)
+    response.set_cookie(key=token_type, value=token, httponly=True, expires=expire)
 
 
 async def get_user_by_token(token):
