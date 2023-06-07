@@ -9,4 +9,5 @@ front/node_modules
 **/__pycache__
 app/logs.log
 .dockerignore
+.env.celery
 docker-compose.redis.yml

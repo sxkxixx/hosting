@@ -2,10 +2,12 @@ from typing import Optional
 import fastapi_jsonrpc as jsonrpc
 from fastapi import HTTPException, Depends, Body, Form, UploadFile, File
 from core.models import User, Video, Comment, Like, View
+from core.config import VIDEO_CONTENT_TYPES, IMAGE_CONTENT_TYPES
 from core.exceptions import AuthError, NoVideoError, NoCommentError, WrongDataError
 from utils.auth import get_current_user_v2, get_unique_name
 from utils.s3_client import upload_file
 from core.schemas import CommentUploadSchema
+from utils.utils import is_valid_signature
 import logging
 
 video_router = jsonrpc.Entrypoint(path='/api/v1/video')
@@ -43,8 +45,10 @@ async def upload_video(user: User = Depends(get_current_user_v2), title: str = F
     if not user:
         logging.warning(f'Upload Video: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
-    if 'video' not in video_file.content_type:
-        raise HTTPException(status_code=404, detail='Bad request')
+    if not (video_file.content_type in VIDEO_CONTENT_TYPES and preview_file.content_type in IMAGE_CONTENT_TYPES):
+        raise HTTPException(status_code=404, detail='Bad file type')
+    if not is_valid_signature(file_type='video', file=video_file) or not is_valid_signature(file_type='image', file=preview_file):
+        raise HTTPException(status_code=404, detail='Bad file type')
     try:
         cloud_video_name = 'videos/' + get_unique_name(video_file.filename)
         result = await upload_file(video_file, cloud_video_name)
@@ -176,3 +180,9 @@ async def delete_video(video_id: int = Body(...), user: User = Depends(get_curre
         return context
     logging.error(f'Delete Video: User-{user.email} can\'t delete video-{video.id}')
     raise WrongDataError()
+
+
+@video_router.post('/check')
+async def check(file: UploadFile = File(...)):
+    return await is_valid_signature(file_type='image', file=file)
+

@@ -2,11 +2,13 @@ import styles from "./AdminPage.module.css";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import {useState} from "react";
+import {useNavigate} from "react-router-dom";
 
 const url = process.env.REACT_APP_API_URL;
 
 const VideoInfo = ({id, video_id, claim_text}) => {
     const [showed, setShowed] = useState(true);
+    const navigate = useNavigate();
 
     const setClaimStatus = (event, status) => {
         event.preventDefault();
@@ -28,7 +30,7 @@ const VideoInfo = ({id, video_id, claim_text}) => {
                 <div>
                     <p className={styles.text}>Видео<br/></p>
                     <div className={styles.sign}>
-                        <a href={`http://127.0.0.1:3000/watch/${video_id}`}>Cсылка на видео</a>
+                        <a onClick={() => navigate(`/watch/${video_id}`)}>Cсылка на видео</a>
                     </div>
                 </div>
                 <div>

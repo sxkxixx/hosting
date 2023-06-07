@@ -1,13 +1,13 @@
-import datetime
 from fastapi import Depends, Response, HTTPException, Body, UploadFile, File
+from core.celery.tasks import send_message
 from utils.auth import Hasher, get_unique_name, get_current_user_v2
 from core.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_MINUTES, AVATARS_DIR
-from core.models import User, Video, Role, Claim, Subscription, View
+from core.models import User, Video, Role, Claim, Subscription
 from core.schemas import UserRegister, UserSchema, ClaimSchema
 from core.exceptions import UserExistsError, WrongDataError, NoUserError, AuthError
 import fastapi_jsonrpc as jsonrpc
 from utils.s3_client import upload_file, delete_object
-from utils.utils import get_user_videos
+from utils.utils import get_user_videos, is_valid_signature
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
@@ -40,6 +40,7 @@ async def register(user: UserRegister, response: Response) -> dict:
                                 expires=ACCESS_TOKEN_EXPIRE_MINUTES)
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, samesite='none', secure=True,
                                 expires=REFRESH_TOKEN_EXPIRE_MINUTES)
+        send_message.delay(user.email)
         return {'detail': 'Пользователь {} успешно создан'.format(user.email)}
     except Exception as e:
         logging.error(f'Register: {e}')
@@ -141,6 +142,8 @@ async def delete_user(user: User = Depends(get_current_user_v2)) -> str:
 async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get_current_user_v2)):
     if not user:
         raise HTTPException(status_code=401, detail='Unauthorized')
+    if not is_valid_signature(file_type='image', file=avatar):
+        raise HTTPException(status_code=404, detail='Bad file type')
     if user.avatar:
         await delete_object(user.avatar)
     unique_avatar_name = AVATARS_DIR + get_unique_name(avatar.filename)

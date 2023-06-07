@@ -1,13 +1,12 @@
 import sqlalchemy
-
 from core.config import CORS_HOST
-from core.models import database, DATABASE_URL, metadata, create_roles, with_connect
+from core.models import database, DATABASE_URL, metadata
 from endpoints.user import user_route
 from endpoints.video import video_router
 from endpoints.admin import admin_route
 from fastapi.middleware.cors import CORSMiddleware
 import fastapi_jsonrpc as jsonrpc
-import asyncio
+
 
 app = jsonrpc.API(
     title='Video Hosting'
@@ -45,4 +44,3 @@ async def shutdown() -> None:
 
 engine = sqlalchemy.create_engine(DATABASE_URL)
 metadata.create_all(engine)
-# asyncio.run(with_connect(create_roles))
