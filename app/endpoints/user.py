@@ -144,6 +144,7 @@ async def upload_avatar(avatar: UploadFile = File(...), user: User = Depends(get
         raise HTTPException(status_code=401, detail='Unauthorized')
     if not is_valid_signature(file_type='image', file=avatar):
         raise HTTPException(status_code=404, detail='Bad file type')
+    avatar.file.seek(0)
     if user.avatar:
         await delete_object(user.avatar)
     unique_avatar_name = AVATARS_DIR + get_unique_name(avatar.filename)

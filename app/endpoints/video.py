@@ -182,9 +182,3 @@ async def delete_video(video_id: int = Body(...), user: User = Depends(get_curre
         return context
     logging.error(f'Delete Video: User-{user.email} can\'t delete video-{video.id}')
     raise WrongDataError()
-
-
-@video_router.post('/check')
-async def check(file: UploadFile = File(...)):
-    return await is_valid_signature(file_type='image', file=file)
-
