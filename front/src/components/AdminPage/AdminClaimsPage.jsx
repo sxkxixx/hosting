@@ -1,4 +1,4 @@
-import styles from './AdminPage.module.css';
+import styles from './AdminClaims.module.css';
 import CommentInfo from "./CommentInfo";
 import VideoInfo from "./VideoInfo";
 import {useEffect, useState} from "react";
@@ -9,7 +9,7 @@ import {ReactComponent as Logo} from "../../img/play.svg";
 
 const url = process.env.REACT_APP_API_URL;
 
-const AdminPage = () => {
+const AdminClaimsPage = () => {
     const [commentClaims, setCommentClaims] = useState([]);
     const [videoClaims, setVideoClaims] = useState([]);
     const navigate = useNavigate();
@@ -57,4 +57,4 @@ const AdminPage = () => {
     )
 };
 
-export default AdminPage
+export default AdminClaimsPage

@@ -8,6 +8,7 @@ import fastapi_jsonrpc as jsonrpc
 from utils.s3_client import upload_file, delete_object
 from utils.utils import get_user_videos, is_valid_signature
 from utils.smtp_task import send_message
+from utils.message_templates import on_register_template
 import logging
 
 user_route = jsonrpc.Entrypoint(path='/api/v1/user')
@@ -40,7 +41,7 @@ async def register(user: UserRegister, response: Response, background_task: Back
                                 expires=ACCESS_TOKEN_EXPIRE_MINUTES)
         response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
                                 expires=REFRESH_TOKEN_EXPIRE_MINUTES)
-        background_task.add_task(send_message, user.email)
+        background_task.add_task(send_message, 'Регистрация на видеохостинге', on_register_template, user.email)
         return {'detail': 'Пользователь {} успешно создан'.format(user.email)}
     except Exception as e:
         logging.error(f'Register: {e}')
@@ -60,9 +61,9 @@ async def login(response: Response, user: UserSchema) -> dict:
             data = {'sub': user.email}
             access_token = Hasher.get_encode_token(data,)
             refresh_token = Hasher.get_encode_token(data, REFRESH_TOKEN_EXPIRE_MINUTES)
-            response.set_cookie(key='access_token', value=access_token, httponly=True, samesite='none', secure=True,
+            response.set_cookie(key='access_token', value=access_token, httponly=True,
                                 expires=ACCESS_TOKEN_EXPIRE_MINUTES)
-            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True, samesite='none', secure=True,
+            response.set_cookie(key='refresh_token', value=refresh_token, httponly=True,
                                 expires=REFRESH_TOKEN_EXPIRE_MINUTES)
             logging.info(f'Login: Successfully login {user.email}')
             return {'user': user.email, 'status': 'Authorized'}

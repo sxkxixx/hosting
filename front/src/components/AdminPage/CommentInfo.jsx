@@ -1,4 +1,4 @@
-import styles from "./AdminPage.module.css";
+import styles from "./AdminClaims.module.css";
 import getAxiosBody from "../sendData";
 import axios from "axios";
 import {useState} from "react";

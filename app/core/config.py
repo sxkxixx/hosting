@@ -28,9 +28,10 @@ LINK = getenv('LINK')
 SMTP_EMAIL = getenv('SMTP_EMAIL')
 SMTP_PASSWORD = getenv('SMTP_PASSWORD')
 SMTP_SERVER = getenv('SMTP_SERVER')
-BROKER_URL = getenv('BROKER_URL')
 
 CORS_HOST = getenv('CORS_HOST')
+SAME_SITE = getenv('SAME_SITE')
+SECURE = bool(getenv('SECURE'))
 
 VIDEO_CONTENT_TYPES = ['video/mp4', 'video/MPV', 'video/mpeg', 'video/ogg', 'video/webm']
 IMAGE_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp']

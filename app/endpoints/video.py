@@ -45,6 +45,8 @@ async def upload_video(user: User = Depends(get_current_user_v2), title: str = F
     if not user:
         logging.warning(f'Upload Video: No User')
         raise HTTPException(status_code=401, detail='Unauthorized')
+    if all(' ' == i for i in title):
+        raise HTTPException(status_code=404, detail='Incorrect video name')
     if not (video_file.content_type in VIDEO_CONTENT_TYPES and preview_file.content_type in IMAGE_CONTENT_TYPES):
         raise HTTPException(status_code=404, detail='Bad file type')
     if not is_valid_signature(file_type='video', file=video_file) or not is_valid_signature(file_type='image', file=preview_file):
@@ -78,6 +80,8 @@ async def upload_comment(comment_data: CommentUploadSchema, user: User = Depends
     if not user:
         logging.warning(f'Upload Comment: No User')
         raise AuthError()
+    if all(' ' == i for i in comment_data.comment_text):
+        raise WrongDataError()
     video = await Video.objects.get_or_none(comment_data.video_id == Video.id)
     if not video:
         logging.warning(f'Upload Comment: No Video: {comment_data.video_id}')

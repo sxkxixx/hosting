@@ -1,0 +1,70 @@
+.header p {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+}
+
+.main {
+    display: flex;
+    flex-direction: column;
+}
+
+.buttons {
+    display: flex;
+    gap: 20px;
+    margin: 0 auto 20px;
+}
+
+.button {
+    font-size: 20px;
+    background-color: #2B5279;
+    color: white;
+    border: 1px solid #2B5279;
+    border-radius: 5px;
+    padding: 5px 10px;
+    transition: 0.1s;
+}
+
+.active {
+    background-color: #fff;
+    color: #2B5279;
+    border: 1px solid #2B5279;
+}
+
+.objects__container {
+    display: flex;
+    gap: 40px;
+}
+
+.card__text {
+}
+
+.card__video {
+    border: 1px solid #2B5279;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+}
+
+.info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.card__user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid #2B5279;
+    border-radius: 10px;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.avatar {
+    object-fit: cover;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+}
+

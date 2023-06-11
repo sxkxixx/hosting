@@ -16,6 +16,7 @@ class UserRegister(UserSchema):
     def no_space_validator(cls, v, values, **kwargs):
         if ' ' in v:
             raise ValueError(f'No space in "{kwargs["field"].name.capitalize()}"')
+        print(v)
         return v
 
     @validator('password', 'password_repeat')

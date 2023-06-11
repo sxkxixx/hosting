@@ -1,7 +1,8 @@
 from fastapi import UploadFile, File
 from core.models import Video
 
-VIDEO_SIGNATURES = ['66 74 79 70 4D 53 4E 56', '66 74 79 70 69 73 6F 6D', '66 74 79 70 6D 70 34 32']
+VIDEO_SIGNATURES = ['66 74 79 70 4D 53 4E 56', '66 74 79 70 69 73 6F 6D', '66 74 79 70 6D 70 34 32',
+                    '00 00 01 B3', '00 00 01 BA']
 IMAGE_SIGNATURE = ['FF D8 FF E0', '49 46 00 01', '89 50 4E 47 0D 0A 1A 0A']
 
 

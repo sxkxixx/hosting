@@ -7,8 +7,9 @@ import Register from "./components/Register/Register";
 import Login from "./components/Login/Login";
 import ClaimPopup from "./components/ClaimPopup/ClaimPopup";
 import AdminLogin from "./components/Login/AdminLogin";
-import AdminPage from "./components/AdminPage/AdminPage";
+import AdminClaimsPage from "./components/AdminPage/AdminClaimsPage";
 import UserPage from "./components/UserPage/UserPage";
+import AdminMain from "./components/AdminPage/AdminMain";
 
 const App = () => {
   return (
@@ -21,8 +22,9 @@ const App = () => {
         <Route path="/login" element={<Login/>}></Route>
         <Route path="/popup" element={<ClaimPopup/>}></Route>
         <Route path="/admin/login" element={<AdminLogin/>}></Route>
-        <Route path="/admin/main" element={<AdminPage/>}></Route>
+        <Route path="/admin/claims" element={<AdminClaimsPage/>}></Route>
         <Route path="/user/:id" element={<UserPage/>}></Route>
+        <Route path="/admin/main" element={<AdminMain/>}/>
       </Routes>
     </div>
   );
