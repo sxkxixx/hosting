@@ -65,7 +65,6 @@ async def change_claim_status(claim_id: int = Body(...), status: str = Body(...)
         raise WrongDataError()
     if status not in {'approved', 'denied'}:
         raise WrongDataError()
-    await claim.update(status=status)
     if status == 'denied':
         await claim.delete()
         return {'claim': claim.id, 'status': claim.status}

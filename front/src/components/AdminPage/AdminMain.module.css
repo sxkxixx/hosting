@@ -33,7 +33,9 @@
 
 .objects__container {
     display: flex;
-    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 80px;
 }
 
 .card__text {
