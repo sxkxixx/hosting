@@ -1,7 +1,6 @@
 /venv/
 .idea
 .gitignore
-Readme.md
 database.db
 .env
 .env.prod
